@@ -6,7 +6,7 @@ class Egor:
         return f"Егор со статусом {self.status}"
 
     def __repr__(self):
-        return f"Егор со статусом {self.status}"
+        return self.status
 
 
 if __name__ == '__main__':
