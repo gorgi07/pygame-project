@@ -150,7 +150,7 @@ class Player(pygame.sprite.Sprite):
         global jump, flag
         if jump > 0:
             flag = False
-            self.rect.y -= STEP * 1.2
+            self.rect.y -= STEP * 0.6
             if pygame.sprite.spritecollideany(self, wall_group):
                 jump = 0
             while pygame.sprite.spritecollideany(self, wall_group):
@@ -178,7 +178,7 @@ class Player(pygame.sprite.Sprite):
                 self.rect.x -= 1
 
         if keys[pygame.K_UP] and flag:
-            jump, self.jump_flag = 6, True
+            jump, self.jump_flag = 16, True
 
     def update(self):
         """
