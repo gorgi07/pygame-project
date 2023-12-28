@@ -130,13 +130,13 @@ class Player(pygame.sprite.Sprite):
     """
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
-        self.player_image_left = load_image('mario.png')
-        self.player_image_right = pygame.transform.flip(
-            self.player_image_left,
+        self.player_image_right = load_image('player.png')
+        self.player_image_left = pygame.transform.flip(
+            self.player_image_right,
             True,
             False
         )
-        self.image = self.player_image_left
+        self.image = self.player_image_right
 
         self.add(player_group)
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15,
