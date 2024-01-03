@@ -40,12 +40,10 @@ def generate_level(level):
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Background(x, y)
-            elif level[y][x] == '#':
+            Background(x, y)
+            if level[y][x] == '#':
                 Wall(x, y)
             elif level[y][x] == '@':
-                Background(x, y)
                 new_player = Player(x, y)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
@@ -87,10 +85,20 @@ def go_level(_id, result):
 
         player.update()
         screen_draw()
+        if _id == 1 or _id == 2:
+            fog(player)
         pygame.display.flip()
         clock.tick(FPS)
 
     terminate()
+
+
+def fog(player):
+    for x in range(WIDTH // 64):
+        for y in range(HEIGHT // 64):
+            if (abs(player.rect.x // 64 - x) >= 2
+                    or abs(player.rect.y // 64 - y) >= 2):
+                pygame.draw.rect(screen, 'black', (x * 64, y * 64, 64, 64))
 
 
 def levels_screen():
@@ -266,8 +274,8 @@ def screen_draw():
     """
     global screen, wall_group, empty_group, player_group
     screen.fill(pygame.Color(0, 0, 0))
-    wall_group.draw(screen)
     empty_group.draw(screen)
+    wall_group.draw(screen)
     player_group.draw(screen)
 
 
@@ -278,6 +286,7 @@ class Wall(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(wall_group, all_sprites)
         self.image = tile_images['wall']
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
                                                * pos_y)
 
@@ -306,6 +315,7 @@ class Player(pygame.sprite.Sprite):
             False
         )
         self.image = self.player_image_right
+        self.mask = pygame.mask.from_surface(self.image)
 
         self.add(player_group)
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15,
@@ -343,8 +353,12 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.rect.x += STEP
             self.image = self.player_image_right
-            while pygame.sprite.spritecollideany(self, wall_group):
-                self.rect.x -= 1
+            wall = pygame.sprite.spritecollideany(self, wall_group)
+            if wall is not None:
+                # print(pygame.sprite.collide_mask(self, wall))
+                while pygame.sprite.collide_mask(self, wall) is not None:
+                    # print(self.rect)
+                    self.rect.x -= 1
 
         if keys[pygame.K_UP] and flag:
             jump, self.jump_flag = 16, True
