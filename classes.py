@@ -12,6 +12,7 @@ all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()  # игрок сталкивается с этими спрайтами
 empty_group = pygame.sprite.Group()  # игрок проходит через эти спрайты
 player_group = pygame.sprite.Group()
+finish_group = pygame.sprite.Group()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
@@ -45,6 +46,8 @@ def generate_level(level):
                 Wall(x, y)
             elif level[y][x] == '@':
                 new_player = Player(x, y)
+            elif level[y][x] == 'F':
+                Finish(x, y)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
@@ -55,6 +58,10 @@ def terminate():
     """
     pygame.quit()
     sys.exit()
+
+
+def finish_level():
+    pass
 
 
 def go_level(_id, result):
@@ -89,16 +96,24 @@ def go_level(_id, result):
             fog(player)
         pygame.display.flip()
         clock.tick(FPS)
+        finish_tile = pygame.sprite.spritecollideany(player, finish_group)
+        if (finish_tile is not None and player.rect.x > finish_tile.rect.x
+                and player.rect.y > finish_tile.rect.y):
+            running = False
 
-    terminate()
+    finish_level()
+    levels_screen()
 
 
 def fog(player):
-    for x in range(WIDTH // 64):
-        for y in range(HEIGHT // 64):
-            if (abs(player.rect.x // 64 - x) >= 2
-                    or abs(player.rect.y // 64 - y) >= 2):
-                pygame.draw.rect(screen, 'black', (x * 64, y * 64, 64, 64))
+    for x in range(WIDTH // tile_width):
+        for y in range(HEIGHT // tile_height):
+            if (abs(player.rect.x // tile_width - x) >= 2
+                    or abs(player.rect.y // tile_height - y) >= 2):
+                pygame.draw.rect(screen, 'black', (x * tile_width,
+                                                   y * tile_height,
+                                                   tile_width,
+                                                   tile_height))
 
 
 def levels_screen():
@@ -297,6 +312,17 @@ class Background(pygame.sprite.Sprite):
     """
     def __init__(self, pos_x, pos_y):
         super().__init__(empty_group, all_sprites)
+        self.image = tile_images['empty']
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
+                                               * pos_y)
+
+
+class Finish(pygame.sprite.Sprite):
+    '''
+    Класс финиша
+    '''
+    def __init__(self, pos_x, pos_y):
+        super().__init__(finish_group, all_sprites)
         self.image = tile_images['empty']
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
                                                * pos_y)
