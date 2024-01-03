@@ -1,5 +1,5 @@
 from classes import *
-from config import (FPS, WIDTH, HEIGHT)
+from config import (WIDTH, HEIGHT)
 
 pygame.init()
 pygame.key.set_repeat(200, 70)
@@ -13,29 +13,3 @@ empty_group = pygame.sprite.Group()    # игрок проходит через 
 player_group = pygame.sprite.Group()
 
 start_screen()
-
-player, level_x, level_y = generate_level(load_level("levelex.txt"))
-
-running = True
-flag = True
-jump = 0
-
-while running:
-    for event in pygame.event.get():
-        keys = pygame.key.get_pressed()
-        if event.type == pygame.QUIT:
-            running = False
-        elif keys[pygame.K_ESCAPE]:
-            pygame.display.iconify()
-        else:
-            player.moving(keys)
-
-    if player.jump_flag:
-        player.jump()
-
-    player.update()
-    screen_draw()
-    pygame.display.flip()
-    clock.tick(FPS)
-
-terminate()

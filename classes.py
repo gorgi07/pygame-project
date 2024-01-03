@@ -16,7 +16,6 @@ player_group = pygame.sprite.Group()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-running = True
 flag = True
 jump = 0
 
@@ -58,6 +57,40 @@ def terminate():
     """
     pygame.quit()
     sys.exit()
+
+
+def go_level(_id, result):
+    running = True
+    if _id != 1:
+        if result == 1:
+            player, level_x, level_y = generate_level(
+                load_level(f"levele{_id}.txt"))
+        else:
+            print("error")
+            return
+    else:
+        player, level_x, level_y = generate_level(
+            load_level(f"levele{_id}.txt"))
+
+    while running:
+        for event in pygame.event.get():
+            keys = pygame.key.get_pressed()
+            if event.type == pygame.QUIT:
+                running = False
+            elif keys[pygame.K_ESCAPE]:
+                pygame.display.iconify()
+            else:
+                player.moving(keys)
+
+        if player.jump_flag:
+            player.jump()
+
+        player.update()
+        screen_draw()
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    terminate()
 
 
 def levels_screen():
@@ -143,38 +176,32 @@ def levels_screen():
 
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    level_id = 1
                     if event.ui_element == first_button:
-                        print(cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (1,)).fetchone())
+                        level_id = 1
                     elif event.ui_element == second_button:
-                        print(cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (2,)).fetchone())
+                        level_id = 2
                     elif event.ui_element == third_button:
-                        print(cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (3,)).fetchone())
+                        level_id = 3
                     elif event.ui_element == fourth_button:
-                        print(cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (4,)).fetchone())
+                        level_id = 4
                     elif event.ui_element == fifth_button:
-                        print(cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (5,)).fetchone())
+                        level_id = 5
                     elif event.ui_element == sixth_button:
-                        print(cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (6,)).fetchone())
+                        level_id = 6
                     elif event.ui_element == seventh_button:
-                        print(cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (7,)).fetchone())
+                        level_id = 7
                     elif event.ui_element == eighth_button:
-                        print(cur.execute(
+                        level_id = 8
+
+                    if level_id != 1:
+                        res = (cur.execute(
                             """SELECT passed FROM levels WHERE id = ?""",
-                            (8,)).fetchone())
+                            (level_id - 1,)).fetchone())[0]
+                    else:
+                        res = 1
+
+                    go_level(level_id, res)
 
             levels_manager.process_events(event)
         levels_manager.update(time_delta)
