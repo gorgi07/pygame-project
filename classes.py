@@ -1,5 +1,7 @@
 import pygame
+import pygame_gui
 import sys
+import sqlite3
 from load_images import load_image
 from config import (tile_images, tile_width, tile_height,
                     STEP, GRAVITY, WIDTH, HEIGHT, FPS)
@@ -58,35 +60,175 @@ def terminate():
     sys.exit()
 
 
+def levels_screen():
+    con = sqlite3.connect("game_db.db")
+    cur = con.cursor()
+
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+
+    levels_manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+    first_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 0), 20),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="1",
+        manager=levels_manager
+    )
+
+    second_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 1), 20),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="2",
+        manager=levels_manager
+    )
+
+    third_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 2), 20),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="3",
+        manager=levels_manager
+    )
+
+    fourth_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 3), 20),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="4",
+        manager=levels_manager
+    )
+
+    fifth_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 0), 10 + HEIGHT // 2),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="5",
+        manager=levels_manager
+    )
+
+    sixth_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 1), 10 + HEIGHT // 2),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="6",
+        manager=levels_manager
+    )
+
+    seventh_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 2), 10 + HEIGHT // 2),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="7",
+        manager=levels_manager
+    )
+
+    eighth_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect(
+            (20 + (WIDTH // 4 * 3), 10 + HEIGHT // 2),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
+        text="8",
+        manager=levels_manager
+    )
+
+    while True:
+        time_delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                pygame.display.iconify()
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == first_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (1,)).fetchone())
+                    elif event.ui_element == second_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (2,)).fetchone())
+                    elif event.ui_element == third_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (3,)).fetchone())
+                    elif event.ui_element == fourth_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (4,)).fetchone())
+                    elif event.ui_element == fifth_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (5,)).fetchone())
+                    elif event.ui_element == sixth_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (6,)).fetchone())
+                    elif event.ui_element == seventh_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (7,)).fetchone())
+                    elif event.ui_element == eighth_button:
+                        print(cur.execute(
+                            """SELECT passed FROM levels WHERE id = ?""",
+                            (8,)).fetchone())
+
+            levels_manager.process_events(event)
+        levels_manager.update(time_delta)
+        levels_manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def start_screen():
     """
     Функция создания заставки стартового окна
     """
-    intro_text = ["ЗАСТАВКА", "",
-                  "Правила игры",
-                  "Если в правилах несколько строк,",
-                  "приходится выводить их построчно"]
-
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, True, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+    play_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 150, 50), (300, 70)),
+        text="Играть",
+        manager=manager
+    )
+
+    education_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 150, 170), (300, 70)),
+        text="Обучение",
+        manager=manager
+    )
+
+    information_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 150, 290), (300, 70)),
+        text="Об авторах",
+        manager=manager
+    )
 
     while True:
+        time_delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif (event.type == pygame.KEYDOWN or
-                  event.type == pygame.MOUSEBUTTONDOWN):
-                return  # начинаем игру
+
+            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                pygame.display.iconify()
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == play_button:
+                        levels_screen()
+                    elif event.ui_element == education_button:
+                        return
+                    elif event.ui_element == information_button:
+                        return
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
