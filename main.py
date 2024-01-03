@@ -4,7 +4,7 @@ from config import (FPS, WIDTH, HEIGHT)
 pygame.init()
 pygame.key.set_repeat(200, 70)
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT), flags=pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
@@ -22,10 +22,13 @@ jump = 0
 
 while running:
     for event in pygame.event.get():
+        keys = pygame.key.get_pressed()
         if event.type == pygame.QUIT:
             running = False
+        elif keys[pygame.K_ESCAPE]:
+            pygame.display.iconify()
         else:
-            player.moving(pygame.key.get_pressed())
+            player.moving(keys)
 
     if player.jump_flag:
         player.jump()
