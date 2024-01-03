@@ -85,8 +85,8 @@ def go_level(_id, result):
 
         player.update()
         screen_draw()
-        # if _id == 1 or _id == 2:
-        #     fog(player)
+        if _id == 1 or _id == 2:
+            fog(player)
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -367,7 +367,6 @@ class Player(pygame.sprite.Sprite):
         if jump == 0:
             self.rect.y += GRAVITY
             sprites = pygame.sprite.spritecollide(self, wall_group, False)
-            print(sprites, len(sprites))
             if not pygame.sprite.spritecollideany(self, wall_group):
                 flag = False
             while (pygame.sprite.spritecollideany(self, wall_group) and
