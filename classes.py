@@ -85,8 +85,8 @@ def go_level(_id, result):
 
         player.update()
         screen_draw()
-        if _id == 1 or _id == 2:
-            fog(player)
+        # if _id == 1 or _id == 2:
+        #     fog(player)
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -353,12 +353,8 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.rect.x += STEP
             self.image = self.player_image_right
-            wall = pygame.sprite.spritecollideany(self, wall_group)
-            if wall is not None:
-                # print(pygame.sprite.collide_mask(self, wall))
-                while pygame.sprite.collide_mask(self, wall) is not None:
-                    # print(self.rect)
-                    self.rect.x -= 1
+            while pygame.sprite.spritecollideany(self, wall_group):
+                self.rect.x -= 1
 
         if keys[pygame.K_UP] and flag:
             jump, self.jump_flag = 16, True
@@ -370,8 +366,12 @@ class Player(pygame.sprite.Sprite):
         global jump, flag
         if jump == 0:
             self.rect.y += GRAVITY
-            if not (pygame.sprite.spritecollideany(self, wall_group)):
+            sprites = pygame.sprite.spritecollide(self, wall_group, False)
+            print(sprites, len(sprites))
+            if not pygame.sprite.spritecollideany(self, wall_group):
                 flag = False
-            while pygame.sprite.spritecollideany(self, wall_group):
+            while (pygame.sprite.spritecollideany(self, wall_group) and
+                   all(map(lambda block: block.rect.y >= self.rect.y,
+                           sprites))):
                 self.rect.y -= 1
                 flag = True
