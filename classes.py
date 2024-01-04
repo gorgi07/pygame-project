@@ -2,7 +2,7 @@ import pygame
 from functions import load_image
 from config import (tile_width, tile_height, tile_images, STEP, GRAVITY,
                     wall_group, empty_group, game_flag, jump_move,
-                    player_group, finish_group, all_sprites)
+                    player_group, finish_group, all_sprites, flags_group)
 
 pygame.init()
 game_flag, jump_move = game_flag, jump_move
@@ -19,10 +19,14 @@ def generate_level(level):
             Background(x, y)
             if level[y][x] == '#':
                 Wall(x, y)
+            elif level[y][x] == '_':
+                Platform(x, y)
             elif level[y][x] == '@':
                 new_player = Player(x, y)
             elif level[y][x] == 'F':
                 Finish(x, y)
+            elif level[y][x] == 'f':
+                Flag(x, y)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
@@ -34,7 +38,6 @@ class Wall(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(wall_group, all_sprites)
         self.image = tile_images['wall']
-        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
                                                * pos_y)
 
@@ -50,15 +53,55 @@ class Background(pygame.sprite.Sprite):
                                                * pos_y)
 
 
+class Platform(pygame.sprite.Sprite):
+    """
+    Класс платформы (полублока)
+    """
+
+    def __init__(self, pos_x, pos_y):
+        super().__init__(wall_group, all_sprites)
+        self.image = tile_images['platform']
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
+                                               * pos_y)
+
+
 class Finish(pygame.sprite.Sprite):
     """
     Класс финиша
     """
     def __init__(self, pos_x, pos_y):
         super().__init__(finish_group, all_sprites)
-        self.image = tile_images['empty']
+        self.image = tile_images['portal']
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
                                                * pos_y)
+
+    def update(self):
+        """
+        Гравитация флага
+        """
+        self.rect.y += GRAVITY
+        while pygame.sprite.spritecollideany(self, wall_group):
+            self.rect.y -= 1
+
+
+class Flag(pygame.sprite.Sprite):
+    """
+    Класс флажков
+    """
+    def __init__(self, pos_x, pos_y):
+        super().__init__(flags_group, all_sprites)
+        self.image = tile_images['down_flag']
+        self.activity = True
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
+                                               * pos_y)
+
+    def update(self):
+        """
+        Гравитация флага
+        """
+        self.rect.y += GRAVITY
+        while pygame.sprite.spritecollideany(self, wall_group):
+            self.rect.y -= 1
 
 
 class Player(pygame.sprite.Sprite):

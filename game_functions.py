@@ -5,7 +5,8 @@ from functions import (load_image, load_level, terminate)
 from classes import generate_level
 from config import (tile_width, tile_height, FPS,
                     clock, wall_group, empty_group,
-                    player_group, finish_group)
+                    player_group, finish_group, tile_images, flags_group,
+                    all_sprites)
 from screen import (screen, WIDTH, HEIGHT)
 
 
@@ -18,6 +19,8 @@ def screen_draw():
     """
     screen.fill(pygame.Color(0, 0, 0))
     empty_group.draw(screen)
+    finish_group.draw(screen)
+    flags_group.draw(screen)
     wall_group.draw(screen)
     player_group.draw(screen)
 
@@ -53,14 +56,17 @@ def go_level(_id, result):
             player.jump()
 
         player.update()
+        flags_group.update()
+        finish_group.update()
+        checking_flags(player, flags_group)
         screen_draw()
-        if _id == 1 or _id == 2:
-            fog(player)
+        # if _id == 1 or _id == 2:
+        #     fog(player)
         pygame.display.flip()
         clock.tick(FPS)
         finish_tile = pygame.sprite.spritecollideany(player, finish_group)
         if (finish_tile is not None and player.rect.x > finish_tile.rect.x
-                and player.rect.y > finish_tile.rect.y):
+                and finish_tile.rect.y - player.rect.y < 20):
             running = False
 
     finish_level()
@@ -243,3 +249,12 @@ def start_screen():
         manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(FPS)
+
+
+def checking_flags(player, flags_group):
+    flag = pygame.sprite.spritecollideany(player, flags_group)
+    if flag is not None:
+        if (flag.activity and flag.rect.x - player.rect.x < 20
+                and flag.rect.y - player.rect.y < 20):
+            flag.activity = False
+            flag.image = tile_images['up_flag']
