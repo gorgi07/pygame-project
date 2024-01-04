@@ -318,9 +318,9 @@ class Background(pygame.sprite.Sprite):
 
 
 class Finish(pygame.sprite.Sprite):
-    '''
+    """
     Класс финиша
-    '''
+    """
     def __init__(self, pos_x, pos_y):
         super().__init__(finish_group, all_sprites)
         self.image = tile_images['empty']
