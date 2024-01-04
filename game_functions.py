@@ -26,7 +26,12 @@ def screen_draw():
 
 
 def finish_level():
-    pass
+    all_sprites.empty()
+    wall_group.empty()
+    player_group.empty()
+    finish_group.empty()
+    empty_group.empty()
+    flags_group.empty()
 
 
 def go_level(_id, result):
