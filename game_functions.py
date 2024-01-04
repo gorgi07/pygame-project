@@ -25,7 +25,18 @@ def screen_draw():
     player_group.draw(screen)
 
 
-def finish_level():
+def finish_level(name, _id, flags):
+    con = sqlite3.connect("game_db.db")
+    cur = con.cursor()
+    level = f"level_{_id}"
+    res = cur.execute(f"""SELECT {level} FROM players WHERE name = ?""",
+                      (name, )).fetchone()
+    if int(res[0][3]) < flags:
+        cur.execute(f"""UPDATE players SET {level} = ? WHERE name = ?""",
+                    (f"1, {flags}", name))
+    con.commit()
+    cur.close()
+
     all_sprites.empty()
     wall_group.empty()
     player_group.empty()
@@ -36,8 +47,9 @@ def finish_level():
 
 def go_level(_id, result):
     running = True
+    count_flag = 0
     if _id != 1:
-        if result == 1:
+        if result[0] == 1:
             player, level_x, level_y = generate_level(
                 load_level(f"levele{_id}.txt"))
         else:
@@ -63,7 +75,7 @@ def go_level(_id, result):
         player.update()
         flags_group.update()
         finish_group.update()
-        checking_flags(player, flags_group)
+        count_flag += checking_flags(player, flags_group)
         screen_draw()
         # if _id == 1 or _id == 2:
         #     fog(player)
@@ -74,8 +86,8 @@ def go_level(_id, result):
                 and finish_tile.rect.y - player.rect.y < 20):
             running = False
 
-    finish_level()
-    levels_screen()
+    finish_level("Егор", _id, count_flag)
+    levels_screen("Егор")
 
 
 def fog(player):
@@ -89,7 +101,7 @@ def fog(player):
                                                    tile_height))
 
 
-def levels_screen():
+def levels_screen(name):
     con = sqlite3.connect("game_db.db")
     cur = con.cursor()
 
@@ -191,12 +203,15 @@ def levels_screen():
                         level_id = 8
 
                     if level_id != 1:
+                        level = f"level_{level_id - 1}"
                         res = (cur.execute(
-                            """SELECT passed FROM levels WHERE id = ?""",
-                            (level_id - 1,)).fetchone())[0]
+                            f"""SELECT {level} FROM players WHERE name = ?""",
+                            (name,)).fetchone())
+                        res = (int(res[0][0]), int(res[0][3]))
                     else:
-                        res = 1
+                        res = (1, 0)
 
+                    cur.close()
                     go_level(level_id, res)
 
             levels_manager.process_events(event)
@@ -243,7 +258,7 @@ def start_screen():
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == play_button:
-                        levels_screen()
+                        levels_screen("Егор")
                     elif event.ui_element == education_button:
                         return
                     elif event.ui_element == information_button:
@@ -263,3 +278,5 @@ def checking_flags(player, flags_group):
                 and flag.rect.y - player.rect.y < 20):
             flag.activity = False
             flag.image = tile_images['up_flag']
+            return 1
+    return 0
