@@ -72,16 +72,8 @@ class Finish(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(finish_group, all_sprites)
         self.image = tile_images['portal']
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
-                                               * pos_y)
-
-    def update(self):
-        """
-        Гравитация флага
-        """
-        self.rect.y += GRAVITY
-        while pygame.sprite.spritecollideany(self, wall_group):
-            self.rect.y -= 1
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 10,
+                                               tile_height * pos_y + 13)
 
 
 class Flag(pygame.sprite.Sprite):
@@ -92,16 +84,8 @@ class Flag(pygame.sprite.Sprite):
         super().__init__(flags_group, all_sprites)
         self.image = tile_images['down_flag']
         self.activity = True
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
-                                               * pos_y)
-
-    def update(self):
-        """
-        Гравитация флага
-        """
-        self.rect.y += GRAVITY
-        while pygame.sprite.spritecollideany(self, wall_group):
-            self.rect.y -= 1
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 12,
+                                               tile_height * pos_y + 3)
 
 
 class Player(pygame.sprite.Sprite):
@@ -121,7 +105,7 @@ class Player(pygame.sprite.Sprite):
 
         self.add(player_group)
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15,
-                                               tile_height * pos_y + 5)
+                                               tile_height * pos_y + 20)
         self.jump_flag = True
 
     def jump(self):

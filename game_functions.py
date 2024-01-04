@@ -82,7 +82,7 @@ def go_level(_id, result):
         pygame.display.flip()
         clock.tick(FPS)
         finish_tile = pygame.sprite.spritecollideany(player, finish_group)
-        if finish_tile is not None and finish_tile.rect.x > player.rect.x:
+        if finish_tile is not None:
             if keys[pygame.K_e]:
                 running = False
 
