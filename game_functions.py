@@ -60,8 +60,8 @@ def go_level(_id, result):
             load_level(f"levele{_id}.txt"))
 
     while running:
+        keys = pygame.key.get_pressed()
         for event in pygame.event.get():
-            keys = pygame.key.get_pressed()
             if event.type == pygame.QUIT:
                 running = False
             elif keys[pygame.K_ESCAPE]:
@@ -82,9 +82,9 @@ def go_level(_id, result):
         pygame.display.flip()
         clock.tick(FPS)
         finish_tile = pygame.sprite.spritecollideany(player, finish_group)
-        if (finish_tile is not None and player.rect.x > finish_tile.rect.x
-                and finish_tile.rect.y - player.rect.y < 20):
-            running = False
+        if finish_tile is not None and finish_tile.rect.x > player.rect.x:
+            if keys[pygame.K_e]:
+                running = False
 
     finish_level("Егор", _id, count_flag)
     levels_screen("Егор")
