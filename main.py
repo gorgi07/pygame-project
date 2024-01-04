@@ -1,15 +1,9 @@
-from classes import *
-from config import (WIDTH, HEIGHT)
+import pygame
+from game_functions import start_screen
+from screen import screen
 
 pygame.init()
 pygame.key.set_repeat(200, 70)
-
-screen = pygame.display.set_mode((WIDTH, HEIGHT), flags=pygame.FULLSCREEN)
-clock = pygame.time.Clock()
-
-all_sprites = pygame.sprite.Group()
-wall_group = pygame.sprite.Group()  # игрок сталкивается с этими спрайтами
-empty_group = pygame.sprite.Group()    # игрок проходит через эти спрайты
-player_group = pygame.sprite.Group()
+screen = screen
 
 start_screen()
