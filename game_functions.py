@@ -25,6 +25,15 @@ def screen_draw():
     player_group.draw(screen)
 
 
+def screen_clear():
+    all_sprites.empty()
+    wall_group.empty()
+    player_group.empty()
+    finish_group.empty()
+    empty_group.empty()
+    flags_group.empty()
+
+
 def finish_level(name, _id, flags):
     con = sqlite3.connect("game_db.db")
     cur = con.cursor()
@@ -37,12 +46,7 @@ def finish_level(name, _id, flags):
     con.commit()
     cur.close()
 
-    all_sprites.empty()
-    wall_group.empty()
-    player_group.empty()
-    finish_group.empty()
-    empty_group.empty()
-    flags_group.empty()
+    screen_clear()
 
 
 def go_level(_id, result):
@@ -77,8 +81,8 @@ def go_level(_id, result):
         finish_group.update()
         count_flag += checking_flags(player, flags_group)
         screen_draw()
-        # if _id == 1 or _id == 2:
-        #     fog(player)
+        if _id == 1 or _id == 2:
+            fog(player)
         pygame.display.flip()
         clock.tick(FPS)
         finish_tile = pygame.sprite.spritecollideany(player, finish_group)
@@ -105,7 +109,7 @@ def levels_screen(name):
     con = sqlite3.connect("game_db.db")
     cur = con.cursor()
 
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
 
     levels_manager = pygame_gui.UIManager((WIDTH, HEIGHT))
@@ -180,7 +184,7 @@ def levels_screen(name):
                 terminate()
 
             elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                pygame.display.iconify()
+                start_screen()
 
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
@@ -221,28 +225,77 @@ def levels_screen(name):
         clock.tick(FPS)
 
 
+def information_screen():
+    intro_text = ["АВТОРЫ ИДЕИ:",
+                  "Ерохин Егор  Никулин Никита", "",
+                  "РАЗРАБОТЧИКИ:",
+                  "Никулин Никита   Ерохин Егор", "",
+                  "МУЗЫКАНТЫ:",
+                  "Никулин Никита   Ерохин Егор", "",
+                  "ХУДОЖНИКИ:",
+                  "Ерохин Егор  Никулин Никита", "",
+                  "ДА И ПРОСТО ХОРОШИЕ ЛЮДИ:",
+                  "Никулин Никита   Ерохин Егор ", "",
+                  "З.Ы. Поддержать начинающих разработчиков можно добрым "
+                  "словом на Github :)",
+                  "https://github.com/gorgi07/pygame-project", ""
+                  "З.Ы.Ы. Или переводом на карту ^_^"
+                  ]
+
+    fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, True, "#2fca77")
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                start_screen()
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def start_screen():
     """
     Функция создания заставки стартового окна
     """
-    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    fon = pygame.transform.scale(load_image('fon2.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     manager = pygame_gui.UIManager((WIDTH, HEIGHT))
     play_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((WIDTH // 2 - 150, 50), (300, 70)),
+        relative_rect=pygame.Rect((50, 50), (300, 70)),
         text="Играть",
         manager=manager
     )
 
     education_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((WIDTH // 2 - 150, 170), (300, 70)),
+        relative_rect=pygame.Rect((50, 170), (300, 70)),
         text="Обучение",
         manager=manager
     )
 
     information_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((WIDTH // 2 - 150, 290), (300, 70)),
+        relative_rect=pygame.Rect((50, 290), (300, 70)),
         text="Об авторах",
+        manager=manager
+    )
+
+    exit_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((50, 648), (300, 70)),
+        text="Выход",
         manager=manager
     )
 
@@ -252,9 +305,6 @@ def start_screen():
             if event.type == pygame.QUIT:
                 terminate()
 
-            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                pygame.display.iconify()
-
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == play_button:
@@ -262,7 +312,9 @@ def start_screen():
                     elif event.ui_element == education_button:
                         return
                     elif event.ui_element == information_button:
-                        return
+                        information_screen()
+                    elif event.ui_element == exit_button:
+                        terminate()
 
             manager.process_events(event)
         manager.update(time_delta)
