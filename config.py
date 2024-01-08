@@ -5,6 +5,7 @@ import pygame
 FPS = 50
 STEP = 16
 GRAVITY = 4.5
+SPEED = 32
 tile_images = {'wall': load_image('down_wall.png'),
                'empty': load_image('font.png'),
                'platform': load_image('polovina_bloka.png'),

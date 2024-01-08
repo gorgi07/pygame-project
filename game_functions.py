@@ -4,7 +4,7 @@ import sqlite3
 from pygame_gui.core import ObjectID
 import webbrowser
 from functions import (load_image, load_level, terminate)
-from classes import generate_level
+from classes import generate_level, ActVertPlatform, ActGorPlatform
 from config import (tile_width, tile_height, FPS,
                     clock, wall_group, empty_group,
                     player_group, finish_group, tile_images, flags_group,
@@ -64,7 +64,6 @@ def go_level(_id, result):
     else:
         player, level_x, level_y = generate_level(
             load_level(f"levele{_id}.txt"))
-
     while running:
         keys = pygame.key.get_pressed()
         for event in pygame.event.get():
@@ -78,12 +77,25 @@ def go_level(_id, result):
         if player.jump_flag:
             player.jump()
 
+        for elem in wall_group:
+            if type(elem) is ActVertPlatform:
+                elem.y += elem.v / FPS
+                if abs(elem.y - elem.start) >= 32:
+                    elem.y -= elem.v / FPS
+                    elem.v = -elem.v
+                elem.rect.y = round(elem.y)
+            elif type(elem) is ActGorPlatform:
+                elem.x += elem.v / FPS
+                if abs(elem.x - elem.start) >= 32:
+                    elem.x -= elem.v / FPS
+                    elem.v = -elem.v
+                elem.rect.x = round(elem.x)
         player.update()
         flags_group.update()
         finish_group.update()
         count_flag += checking_flags(player, flags_group)
         screen_draw()
-        if _id == 1 or _id == 2:
+        if _id == 1:
             fog(player)
         pygame.display.flip()
         clock.tick(FPS)

@@ -1,7 +1,7 @@
 import pygame
 from functions import load_image
 from config import (tile_width, tile_height, tile_images, STEP, GRAVITY,
-                    wall_group, empty_group, game_flag, jump_move,
+                    wall_group, empty_group, game_flag, jump_move, SPEED,
                     player_group, finish_group, all_sprites, flags_group)
 
 pygame.init()
@@ -27,6 +27,10 @@ def generate_level(level):
                 Finish(x, y)
             elif level[y][x] == 'f':
                 Flag(x, y)
+            elif level[y][x] == '+':
+                ActVertPlatform(x, y)
+            elif level[y][x] == '-':
+                ActGorPlatform(x, y)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
@@ -57,12 +61,33 @@ class Platform(pygame.sprite.Sprite):
     """
     Класс платформы (полублока)
     """
-
     def __init__(self, pos_x, pos_y):
         super().__init__(wall_group, all_sprites)
         self.image = tile_images['platform']
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
                                                * pos_y)
+
+
+class ActVertPlatform(Platform):
+    """
+    Класс подвижной платформы(вертикальное движение)
+    """
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pos_x, pos_y)
+        self.v = SPEED
+        self.start = pos_y * tile_height
+        self.y = float(pos_y * tile_height)
+
+
+class ActGorPlatform(Platform):
+    """
+    Класс подвижной платформы(горизонтальное движение)
+    """
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pos_x, pos_y)
+        self.v = SPEED
+        self.start = pos_x * tile_height
+        self.x = float(pos_x * tile_height)
 
 
 class Finish(pygame.sprite.Sprite):
