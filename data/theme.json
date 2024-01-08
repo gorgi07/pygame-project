@@ -1,0 +1,62 @@
+{
+     "button":
+     {
+         "colours":
+         {
+             "normal_bg":"#000710",
+             "hovered_bg":"#000710",
+             "selected_bg":"#000710",
+             "dark_bg":"#000710",
+             "normal_text":"#2039d7",
+             "hovered_text":"#2dc5db",
+             "selected_text":"#2dc5db",
+             "link_text": "#2039d7",
+             "link_hover": "#2dc5db",
+             "link_selected": "#2dc5db",
+             "normal_border": "#000710",
+             "hovered_border": "#000710",
+             "selected_border": "#000710",
+             "active_border": "#000710"
+         }
+     },
+     "@git_buttons":
+     {
+         "colours":
+         {
+             "normal_bg":"#000710",
+             "hovered_bg":"#000710",
+             "selected_bg":"#000710",
+             "dark_bg":"#000710",
+             "normal_text":"#2039d7",
+             "hovered_text":"#2dc5db",
+             "selected_text":"#2dc5db",
+             "link_text": "#2039d7",
+             "link_hover": "#2dc5db",
+             "link_selected": "#2dc5db",
+             "normal_border": "#000710",
+             "hovered_border": "#000710",
+             "selected_border": "#000710",
+             "active_border": "#000710"
+         }
+     },
+    "#git_button":
+         {
+         "colours":
+         {
+             "normal_bg":"#000710",
+             "hovered_bg":"#000710",
+             "selected_bg":"#000710",
+             "dark_bg":"#000710",
+             "normal_text":"#2039d7",
+             "hovered_text":"#2dc5db",
+             "selected_text":"#2dc5db",
+             "link_text": "#2039d7",
+             "link_hover": "#2dc5db",
+             "link_selected": "#2dc5db",
+             "normal_border": "#000710",
+             "hovered_border": "#000710",
+             "selected_border": "#000710",
+             "active_border": "#000710"
+         }
+     }
+}

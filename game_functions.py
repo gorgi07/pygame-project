@@ -1,6 +1,8 @@
 import pygame
 import pygame_gui
 import sqlite3
+from pygame_gui.core import ObjectID
+import webbrowser
 from functions import (load_image, load_level, terminate)
 from classes import generate_level
 from config import (tile_width, tile_height, FPS,
@@ -235,11 +237,7 @@ def information_screen():
                   "ХУДОЖНИКИ:",
                   "Ерохин Егор  Никулин Никита", "",
                   "ДА И ПРОСТО ХОРОШИЕ ЛЮДИ:",
-                  "Никулин Никита   Ерохин Егор ", "",
-                  "З.Ы. Поддержать начинающих разработчиков можно добрым "
-                  "словом на Github :)",
-                  "https://github.com/gorgi07/pygame-project", ""
-                  "З.Ы.Ы. Или переводом на карту ^_^"
+                  "Никулин Никита   Ерохин Егор "
                   ]
 
     fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
@@ -256,7 +254,27 @@ def information_screen():
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/theme.json')
+
+    git_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((10, 608), (610, 50)),
+        text="З.Ы. Поддержать начинающих разработчиков можно добрым словом "
+             "на Github :)",
+        manager=manager,
+        object_id=ObjectID(class_id='@git_buttons',
+                           object_id='#git_button')
+    )
+
+    support_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((10, 668), (290, 50)),
+        text="З.Ы.Ы. Или переводом на карту ^_^",
+        manager=manager,
+        object_id=ObjectID(class_id='@git_buttons',
+                           object_id='#git_button')
+    )
+
     while True:
+        time_delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -264,6 +282,18 @@ def information_screen():
             elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
                 start_screen()
 
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == git_button:
+                        webbrowser.open(
+                            "https://github.com/gorgi07/pygame-project"
+                        )
+                    elif event.ui_element == support_button:
+                        pass
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
