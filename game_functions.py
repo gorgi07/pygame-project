@@ -168,6 +168,10 @@ def fog(player):
                                                    tile_height))
 
 
+def puzles(_id):
+    load_level(f"levele{_id}_2.txt")
+
+
 def levels_screen(name):
     con = sqlite3.connect("game_db.db")
     cur = con.cursor()
