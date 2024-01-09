@@ -125,10 +125,9 @@ class Player(pygame.sprite.Sprite):
             True,
             False
         )
+        self.flying = False
+        self.can_fly = False
         self.image = self.player_image_right
-        self.mask = pygame.mask.from_surface(self.image)
-
-        self.add(player_group)
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15,
                                                tile_height * pos_y + 20)
         self.jump_flag = True
@@ -170,13 +169,23 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_UP] and game_flag:
             jump_move, self.jump_flag = 16, True
 
+        if not keys[pygame.K_SPACE]:
+            self.flying = False
+
+        if self.can_fly and keys[pygame.K_SPACE]:
+            self.flying = True
+
     def update(self):
         """
         Метод обновления изменений игрока
         """
         global game_flag, jump_move
         if jump_move == 0:
-            self.rect.y += GRAVITY
+            if self.flying:
+                grav = GRAVITY // 4
+            else:
+                grav = GRAVITY
+            self.rect.y += grav
             sprites = pygame.sprite.spritecollide(self, wall_group, False)
             if not pygame.sprite.spritecollideany(self, wall_group):
                 game_flag = False
