@@ -27,6 +27,55 @@ def screen_draw():
     player_group.draw(screen)
 
 
+def finish_screen(name, _id, flags):
+    fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
+    fon.set_alpha(200)
+    screen.blit(fon, (0, 0))
+
+    window = pygame.transform.scale(load_image(f'finish_picture{flags}.png'),
+                                    (WIDTH // 3 * 2, HEIGHT // 3 * 2))
+    screen.blit(window, (WIDTH // 6, HEIGHT // 6))
+
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+    next_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 310), (200, 40)),
+        text="Следующий уровень",
+        manager=manager
+    )
+    repeat_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 370), (200, 40)),
+        text="Начать заново",
+        manager=manager
+    )
+    menu_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 430), (200, 40)),
+        text="К уровням",
+        manager=manager
+    )
+
+    while True:
+        time_delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    screen_clear()
+                    if event.ui_element == next_button:
+                        go_level(_id + 1, (1, flags))
+                    elif event.ui_element == repeat_button:
+                        go_level(_id, (1, flags))
+                    elif event.ui_element == menu_button:
+                        levels_screen(name)
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def screen_clear():
     all_sprites.empty()
     wall_group.empty()
@@ -47,11 +96,10 @@ def finish_level(name, _id, flags):
                     (f"1, {flags}", name))
     con.commit()
     cur.close()
+    finish_screen(name, _id, flags)
 
-    screen_clear()
 
-
-def go_level(_id, result):
+def go_level(_id: int, result: tuple):
     running = True
     count_flag = 0
     if _id != 1:
@@ -90,6 +138,7 @@ def go_level(_id, result):
                     elem.x -= elem.v / FPS
                     elem.v = -elem.v
                 elem.rect.x = round(elem.x)
+
         player.update()
         flags_group.update()
         finish_group.update()
