@@ -125,20 +125,7 @@ def go_level(_id: int, result: tuple):
         if player.jump_flag:
             player.jump()
 
-        for elem in wall_group:
-            if type(elem) is ActVertPlatform:
-                elem.y += elem.v / FPS
-                if abs(elem.y - elem.start) >= 32:
-                    elem.y -= elem.v / FPS
-                    elem.v = -elem.v
-                elem.rect.y = round(elem.y)
-            elif type(elem) is ActGorPlatform:
-                elem.x += elem.v / FPS
-                if abs(elem.x - elem.start) >= 32:
-                    elem.x -= elem.v / FPS
-                    elem.v = -elem.v
-                elem.rect.x = round(elem.x)
-
+        wall_group.update()
         player.update()
         flags_group.update()
         finish_group.update()

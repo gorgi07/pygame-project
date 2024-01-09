@@ -1,6 +1,6 @@
 import pygame
 from functions import load_image
-from config import (tile_width, tile_height, tile_images, STEP, GRAVITY,
+from config import (tile_width, tile_height, tile_images, STEP, GRAVITY, FPS,
                     wall_group, empty_group, game_flag, jump_move, SPEED,
                     player_group, finish_group, all_sprites, flags_group)
 
@@ -28,9 +28,9 @@ def generate_level(level):
             elif level[y][x] == 'f':
                 Flag(x, y)
             elif level[y][x] == '+':
-                ActVertPlatform(x, y)
+                ActVertPlatform(x, y, 64)
             elif level[y][x] == '-':
-                ActGorPlatform(x, y)
+                ActGorPlatform(x, y, 32)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
@@ -72,22 +72,48 @@ class ActVertPlatform(Platform):
     """
     Класс подвижной платформы(вертикальное движение)
     """
-    def __init__(self, pos_x, pos_y):
+    def __init__(self, pos_x, pos_y, distance):
         super().__init__(pos_x, pos_y)
         self.v = SPEED
         self.start = pos_y * tile_height
         self.y = float(pos_y * tile_height)
+        self.dist = distance
+
+    def update(self):
+        self.y += self.v / FPS
+        if abs(self.y - self.start) >= self.dist:
+            self.y -= self.v / FPS
+            self.v = -self.v
+        self.rect.y = int(self.y)
+        if pygame.sprite.spritecollideany(self, player_group):
+            player = pygame.sprite.spritecollide(self, player_group, False)[0]
+            if player.rect.y > self.rect.y:
+                print(1)
 
 
 class ActGorPlatform(Platform):
     """
     Класс подвижной платформы(горизонтальное движение)
     """
-    def __init__(self, pos_x, pos_y):
+    def __init__(self, pos_x, pos_y, distance):
         super().__init__(pos_x, pos_y)
         self.v = SPEED
+        self.dist = distance
         self.start = pos_x * tile_height
         self.x = float(pos_x * tile_height)
+
+    def update(self):
+        self.x += self.v / FPS
+        if abs(self.x - self.start) >= self.dist:
+            self.x -= self.v / FPS
+            self.v = -self.v
+        self.rect.x = int(self.x)
+        while pygame.sprite.spritecollideany(self, player_group):
+            player = pygame.sprite.spritecollide(self, player_group, False)[0]
+            if self.v > 0:
+                player.rect.x += 1
+            else:
+                player.rect.x -= 1
 
 
 class Finish(pygame.sprite.Sprite):
