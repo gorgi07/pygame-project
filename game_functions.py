@@ -105,13 +105,13 @@ def go_level(_id: int, result: tuple):
     if _id != 1:
         if result[0] == 1:
             player, level_x, level_y = generate_level(
-                load_level(f"levele{_id}.txt"))
+                load_level(f"level{_id}.txt"))
         else:
             print("error")
             return
     else:
         player, level_x, level_y = generate_level(
-            load_level(f"levele{_id}.txt"))
+            load_level(f"level{_id}.txt"))
     while running:
         keys = pygame.key.get_pressed()
         for event in pygame.event.get():
@@ -156,7 +156,7 @@ def fog(player):
 
 
 def puzles(_id):
-    load_level(f"levele{_id}_2.txt")
+    load_level(f"level{_id}_2.txt")
 
 
 def levels_screen(name):

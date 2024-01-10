@@ -81,8 +81,14 @@ class ActVertPlatform(Platform):
 
     def update(self):
         self.y += self.v / FPS
+        blocks = pygame.sprite.spritecollide(self, wall_group, False)
+        flag = True
         if abs(self.y - self.start) >= self.dist:
             self.y -= self.v / FPS
+            self.v = -self.v
+            flag = False
+        if flag and len(blocks) > 1:
+            self.y -= 3 * self.v / FPS
             self.v = -self.v
         self.rect.y = int(self.y)
         if pygame.sprite.spritecollideany(self, player_group):
@@ -104,13 +110,19 @@ class ActGorPlatform(Platform):
 
     def update(self):
         self.x += self.v / FPS
+        blocks = pygame.sprite.spritecollide(self, wall_group, False)
+        flag = True
         if abs(self.x - self.start) >= self.dist:
             self.x -= self.v / FPS
+            self.v = -self.v
+            flag = False
+        if flag and len(blocks) > 1:
+            self.x -= 3 * self.v / FPS
             self.v = -self.v
         self.rect.x = int(self.x)
         while pygame.sprite.spritecollideany(self, player_group):
             player = pygame.sprite.spritecollide(self, player_group, False)[0]
-            if self.v > 0:
+            if 0 < self.v:
                 player.rect.x += 1
             else:
                 player.rect.x -= 1
