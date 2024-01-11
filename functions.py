@@ -33,10 +33,12 @@ def load_level(filename: str) -> list:
     игры из текстового файла
     """
     filename = "data/" + filename
-    with open(filename, 'r') as mapFile:
+    with open(filename, 'r', encoding='utf-8') as mapFile:
         level_map = [line.strip() for line in mapFile]
-    max_width = max(map(len, level_map))
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+    max_width = max(map(len, level_map[:-1]))
+    array = list(map(lambda x: x.ljust(max_width, '.'), level_map[:-1]))
+    array.append(level_map[-1])
+    return array
 
 
 def terminate():

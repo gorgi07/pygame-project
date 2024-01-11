@@ -27,6 +27,14 @@ def screen_draw():
     player_group.draw(screen)
 
 
+def print_text(text):
+    font = pygame.font.Font(None, 40)
+    text = font.render(text, True, 'green')
+    text_x = WIDTH // 2 - text.get_width() // 2
+    text_y = round(tile_height * 1.5)
+    screen.blit(text, (text_x, text_y))
+
+
 def finish_screen(name, _id, flags):
     fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
     fon.set_alpha(200)
@@ -104,14 +112,15 @@ def go_level(_id: int, result: tuple):
     count_flag = 0
     if _id != 1:
         if result[0] == 1:
-            player, level_x, level_y = generate_level(
+            player, level_x, level_y, text = generate_level(
                 load_level(f"level{_id}.txt"))
         else:
             print("error")
             return
     else:
-        player, level_x, level_y = generate_level(
+        player, level_x, level_y, text = generate_level(
             load_level(f"level{_id}.txt"))
+    text_time = 0
     while running:
         keys = pygame.key.get_pressed()
         for event in pygame.event.get():
@@ -133,6 +142,9 @@ def go_level(_id: int, result: tuple):
         screen_draw()
         if _id == 1:
             fog(player)
+        if text_time < 2 * 50:
+            print_text(text)
+            text_time += 1
         pygame.display.flip()
         clock.tick(FPS)
         finish_tile = pygame.sprite.spritecollideany(player, finish_group)
