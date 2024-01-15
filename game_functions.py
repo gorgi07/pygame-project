@@ -8,7 +8,7 @@ from classes import generate_level
 from config import (tile_width, tile_height, FPS,
                     clock, wall_group, empty_group,
                     player_group, finish_group, tile_images, flags_group,
-                    all_sprites)
+                    all_sprites, buttons_group)
 from screen import (screen, WIDTH, HEIGHT)
 
 
@@ -24,6 +24,7 @@ def screen_draw():
     finish_group.draw(screen)
     flags_group.draw(screen)
     wall_group.draw(screen)
+    buttons_group.draw(screen)
     player_group.draw(screen)
 
 
@@ -141,6 +142,7 @@ def go_level(_id: int, result: tuple):
         player.update()
         flags_group.update()
         finish_group.update()
+        buttons_group.update()
         count_flag += checking_flags(player, flags_group)
         screen_draw()
         if _id == 1:
