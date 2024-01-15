@@ -2,7 +2,8 @@ import pygame
 from functions import load_image
 from config import (tile_width, tile_height, tile_images, STEP, GRAVITY, FPS,
                     wall_group, empty_group, game_flag, jump_move, SPEED,
-                    player_group, finish_group, all_sprites, flags_group)
+                    player_group, finish_group, all_sprites, flags_group,
+                    buttons_group)
 
 pygame.init()
 game_flag, jump_move = game_flag, jump_move
@@ -31,6 +32,16 @@ def generate_level(level):
                 ActVertPlatform(x, y, 64)
             elif level[y][x] == '-':
                 ActGorPlatform(x, y, 32)
+            elif level[y][x] == 'U':
+                ActiveBlock(x, y, 'up', 64)
+            elif level[y][x] == 'D':
+                ActiveBlock(x, y, 'down', 65)
+            elif level[y][x] == 'L':
+                ActiveBlock(x, y, 'left', 64)
+            elif level[y][x] == 'R':
+                ActiveBlock(x, y, 'right', 64)
+            elif level[y][x] == '1':
+                NotStickyButton(x, y)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y, level[-1]
 
@@ -44,6 +55,62 @@ class Wall(pygame.sprite.Sprite):
         self.image = tile_images['wall']
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
                                                * pos_y)
+
+
+class ActiveBlock(Wall):
+    def __init__(self, pos_x, pos_y, direct, distance):
+        super().__init__(pos_x, pos_y)
+        self.start = {'x': float(pos_x * tile_width),
+                      'y': float(pos_y * tile_height)}
+        self.distance = distance
+        self.act_flag = False
+        self.x, self.y = pos_x * tile_width, pos_y * tile_height
+        if direct == 'up' or direct == 'left':
+            self.v = -32
+        elif direct == 'down' or direct == 'right':
+            self.v = 32
+        if direct == 'up' or direct == 'down':
+            self.action = 'y'
+        else:
+            self.action = 'x'
+
+    def update(self):
+        if self.action == 'x' and self.act_flag:
+            self.x += self.v / FPS
+            blocks = pygame.sprite.spritecollide(self, wall_group, False)
+            flag = True
+            if abs(self.x - self.start['x']) >= self.distance:
+                self.x -= self.v / FPS
+                self.act_flag = False
+                flag = False
+            if flag and len(blocks) > 1:
+                self.x -= 3 * self.v / FPS
+                self.act_flag = False
+            self.rect.x = int(self.x)
+            while pygame.sprite.spritecollideany(self, player_group):
+                player = \
+                    pygame.sprite.spritecollide(self, player_group, False)[0]
+                if 0 < self.v:
+                    player.rect.x += 1
+                else:
+                    player.rect.x -= 1
+        elif self.action == 'y' and self.act_flag:
+            self.y += self.v / FPS
+            blocks = pygame.sprite.spritecollide(self, wall_group, False)
+            flag = True
+            if abs(self.y - self.start['y']) >= self.distance:
+                self.y -= self.v / FPS
+                self.act_flag = False
+                flag = False
+            if flag and len(blocks) > 1:
+                self.y -= 3 * self.v / FPS
+                self.act_flag = False
+            self.rect.y = int(self.y)
+            if pygame.sprite.spritecollideany(self, player_group):
+                player = \
+                    pygame.sprite.spritecollide(self, player_group, False)[0]
+                if player.rect.y > self.rect.y:
+                    pass
 
 
 class Background(pygame.sprite.Sprite):
@@ -94,7 +161,7 @@ class ActVertPlatform(Platform):
         if pygame.sprite.spritecollideany(self, player_group):
             player = pygame.sprite.spritecollide(self, player_group, False)[0]
             if player.rect.y > self.rect.y:
-                print(1)
+                pass
 
 
 class ActGorPlatform(Platform):
@@ -149,6 +216,25 @@ class Flag(pygame.sprite.Sprite):
         self.activity = True
         self.rect = self.image.get_rect().move(tile_width * pos_x + 12,
                                                tile_height * pos_y + 3)
+
+
+class NotStickyButton(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(buttons_group, all_sprites)
+        self.image = tile_images['up_btn1']
+        self.activity = True
+        self.rect = self.image.get_rect().move(tile_width * pos_x,
+                                               tile_height * pos_y + 53)
+
+    def update(self):
+        if (pygame.sprite.spritecollideany(self, player_group)
+                and self.activity):
+            self.image = tile_images['down_btn1']
+            self.rect.y += 2
+            self.activity = False
+            for elem in wall_group:
+                if type(elem) is ActiveBlock:
+                    elem.act_flag = True
 
 
 class Player(pygame.sprite.Sprite):
