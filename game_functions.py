@@ -71,10 +71,13 @@ def finish_screen(name, _id, flags):
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     screen_clear()
                     if event.ui_element == next_button:
+                        manager.clear_and_reset()
                         go_level(_id + 1, (1, flags))
                     elif event.ui_element == repeat_button:
+                        manager.clear_and_reset()
                         go_level(_id, (1, flags))
                     elif event.ui_element == menu_button:
+                        manager.clear_and_reset()
                         levels_screen(name)
 
             manager.process_events(event)
@@ -309,6 +312,7 @@ def levels_screen(name):
                         res = (1, 0)
 
                     cur.close()
+                    levels_manager.clear_and_reset()
                     go_level(level_id, res)
 
             levels_manager.process_events(event)
@@ -372,6 +376,7 @@ def information_screen():
                 terminate()
 
             elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                manager.clear_and_reset()
                 start_screen()
 
             elif event.type == pygame.USEREVENT:
@@ -429,10 +434,11 @@ def start_screen():
 
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    manager.clear_and_reset()
                     if event.ui_element == play_button:
                         levels_screen("Player")
                     elif event.ui_element == education_button:
-                        return
+                        terminate()
                     elif event.ui_element == information_button:
                         information_screen()
                     elif event.ui_element == exit_button:
