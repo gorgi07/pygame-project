@@ -27,11 +27,11 @@ def screen_draw():
     player_group.draw(screen)
 
 
-def print_text(text):
-    font = pygame.font.Font(None, 40)
-    text = font.render(text, True, 'green')
-    text_x = WIDTH // 2 - text.get_width() // 2
-    text_y = round(tile_height * 1.5)
+def print_text(text: str, coord: tuple, color='green', mn=1.5, size=40):
+    font = pygame.font.Font(None, size)
+    text = font.render(text, True, color)
+    text_x = coord[0] - text.get_width() // 2
+    text_y = round(coord[1] * mn)
     screen.blit(text, (text_x, text_y))
 
 
@@ -142,15 +142,24 @@ def go_level(_id: int, result: tuple):
         screen_draw()
         if _id == 1:
             fog(player)
-        if text_time < 2 * 50:
-            print_text(text)
+        if text_time < 3 * 50:
+            print_text(text, (WIDTH // 2, tile_height))
             text_time += 1
+        finish_tile = pygame.sprite.spritecollideany(player, finish_group)
+        new_text_time = 0
+        if finish_tile is not None:
+            if new_text_time < 2 * 50:
+                print_text("Нажмите Е для выхода",
+                           (finish_tile.rect.x, finish_tile.rect.y - 17),
+                           color="blue", mn=1, size=15)
+                new_text_time += 1
+            if keys[pygame.K_e]:
+                new_text_time = 2 * 50
+                running = False
+        else:
+            new_text_time = 2 * 50
         pygame.display.flip()
         clock.tick(FPS)
-        finish_tile = pygame.sprite.spritecollideany(player, finish_group)
-        if finish_tile is not None:
-            if keys[pygame.K_e]:
-                running = False
 
     finish_level("Player", _id, count_flag)
     levels_screen("Player")
