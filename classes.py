@@ -14,7 +14,7 @@ def generate_level(level):
     прочитанной схеме уровня
     """
     new_player, x, y = None, None, None
-    for y in range(len(level)):
+    for y in range(len(level) - 1):
         for x in range(len(level[y])):
             Background(x, y)
             if level[y][x] == '#':
@@ -32,7 +32,7 @@ def generate_level(level):
             elif level[y][x] == '-':
                 ActGorPlatform(x, y, 32)
     # вернем игрока, а также размер поля в клетках
-    return new_player, x, y
+    return new_player, x, y, level[-1]
 
 
 class Wall(pygame.sprite.Sprite):
