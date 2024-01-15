@@ -4,7 +4,7 @@ import sqlite3
 from pygame_gui.core import ObjectID
 import webbrowser
 from functions import (load_image, load_level, terminate)
-from classes import generate_level
+from classes import generate_level, ActVertPlatform, ActGorPlatform
 from config import (tile_width, tile_height, FPS,
                     clock, wall_group, empty_group,
                     player_group, finish_group, tile_images, flags_group,
@@ -27,11 +27,11 @@ def screen_draw():
     player_group.draw(screen)
 
 
-def print_text(text: str, coord: tuple, color='green', mn=1.5, size=40):
-    font = pygame.font.Font(None, size)
-    text = font.render(text, True, color)
-    text_x = coord[0] - text.get_width() // 2
-    text_y = round(coord[1] * mn)
+def print_text(text):
+    font = pygame.font.Font(None, 40)
+    text = font.render(text, True, 'green')
+    text_x = WIDTH // 2 - text.get_width() // 2
+    text_y = round(tile_height * 1.5)
     screen.blit(text, (text_x, text_y))
 
 
@@ -142,27 +142,18 @@ def go_level(_id: int, result: tuple):
         screen_draw()
         if _id == 1:
             fog(player)
-        if text_time < 3 * 50:
-            print_text(text, (WIDTH // 2, tile_height))
+        if text_time < 2 * 50:
+            print_text(text)
             text_time += 1
-        finish_tile = pygame.sprite.spritecollideany(player, finish_group)
-        new_text_time = 0
-        if finish_tile is not None:
-            if new_text_time < 2 * 50:
-                print_text("Нажмите Е для выхода",
-                           (finish_tile.rect.x, finish_tile.rect.y - 17),
-                           color="blue", mn=1, size=15)
-                new_text_time += 1
-            if keys[pygame.K_e]:
-                new_text_time = 2 * 50
-                running = False
-        else:
-            new_text_time = 2 * 50
         pygame.display.flip()
         clock.tick(FPS)
+        finish_tile = pygame.sprite.spritecollideany(player, finish_group)
+        if finish_tile is not None:
+            if keys[pygame.K_e]:
+                running = False
 
-    finish_level("Player", _id, count_flag)
-    levels_screen("Player")
+    finish_level("Егор", _id, count_flag)
+    levels_screen("Егор")
 
 
 def fog(player):
@@ -176,6 +167,10 @@ def fog(player):
                                                    tile_height))
 
 
+def puzles(_id):
+    load_level(f"level{_id}_2.txt")
+
+
 def levels_screen(name):
     con = sqlite3.connect("game_db.db")
     cur = con.cursor()
@@ -187,7 +182,7 @@ def levels_screen(name):
     first_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 0), 20),
-            (WIDTH // 4 - 30,  WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="1",
         manager=levels_manager
     )
@@ -195,7 +190,7 @@ def levels_screen(name):
     second_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 1), 20),
-            (WIDTH // 4 - 30, WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="2",
         manager=levels_manager
     )
@@ -203,7 +198,7 @@ def levels_screen(name):
     third_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 2), 20),
-            (WIDTH // 4 - 30, WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="3",
         manager=levels_manager
     )
@@ -211,7 +206,7 @@ def levels_screen(name):
     fourth_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 3), 20),
-            (WIDTH // 4 - 30, WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="4",
         manager=levels_manager
     )
@@ -219,7 +214,7 @@ def levels_screen(name):
     fifth_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 0), 10 + HEIGHT // 2),
-            (WIDTH // 4 - 30, WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="5",
         manager=levels_manager
     )
@@ -227,7 +222,7 @@ def levels_screen(name):
     sixth_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 1), 10 + HEIGHT // 2),
-            (WIDTH // 4 - 30, WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="6",
         manager=levels_manager
     )
@@ -235,7 +230,7 @@ def levels_screen(name):
     seventh_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 2), 10 + HEIGHT // 2),
-            (WIDTH // 4 - 30, WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="7",
         manager=levels_manager
     )
@@ -243,32 +238,10 @@ def levels_screen(name):
     eighth_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect(
             (20 + (WIDTH // 4 * 3), 10 + HEIGHT // 2),
-            (WIDTH // 4 - 30, WIDTH // 4 - 30)),
+            (WIDTH // 4 - 30, HEIGHT // 2 - 30)),
         text="8",
         manager=levels_manager
     )
-
-    levels_sprites_group = pygame.sprite.Group()
-    count = 1
-    for i in range(2):
-        for j in range(4):
-            ind = "none"
-            resul = (cur.execute(
-                f"""SELECT level_{count} FROM players WHERE name = ?""",
-                (name,)).fetchone())
-            resul = (int(resul[0][0]), int(resul[0][3]))
-            if resul[0] == 1:
-                ind = resul[1]
-
-            flag_sprite = pygame.sprite.Sprite(levels_sprites_group)
-            flag_sprite.image = load_image(f"levels_flags_{ind}.png")
-            flag_sprite.rect = flag_sprite.image.get_rect()
-            flag_sprite.rect.x = (20 + (WIDTH // 4 * j))
-            if i == 0:
-                flag_sprite.rect.y = (20 + (WIDTH // 4 - 30))
-            else:
-                flag_sprite.rect.y = ((10 + HEIGHT // 2) + (WIDTH // 4 - 30))
-            count += 1
 
     while True:
         time_delta = clock.tick(FPS) / 1000.0
@@ -314,7 +287,6 @@ def levels_screen(name):
             levels_manager.process_events(event)
         levels_manager.update(time_delta)
         levels_manager.draw_ui(screen)
-        levels_sprites_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -430,7 +402,7 @@ def start_screen():
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == play_button:
-                        levels_screen("Player")
+                        levels_screen("Егор")
                     elif event.ui_element == education_button:
                         return
                     elif event.ui_element == information_button:

@@ -11,7 +11,9 @@ tile_images = {'wall': load_image('down_wall.png'),
                'platform': load_image('polovina_bloka.png'),
                'portal': load_image('portal.png'),
                'down_flag': load_image('down_flag.png'),
-               'up_flag': load_image('up_flag.png')}
+               'up_flag': load_image('up_flag.png'),
+               'down_btn1': load_image('down_button1.png'),
+               'up_btn1': load_image('up_button1.png')}
 tile_width = tile_height = 64
 
 player = None
@@ -21,6 +23,7 @@ empty_group = pygame.sprite.Group()  # игрок проходит через э
 player_group = pygame.sprite.Group()
 finish_group = pygame.sprite.Group()    # спрайт портала(финиша)
 flags_group = pygame.sprite.Group()     # спрайт флажков
+buttons_group = pygame.sprite.Group()
 
 
 clock = pygame.time.Clock()
