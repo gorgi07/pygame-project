@@ -8,6 +8,7 @@ GRAVITY = 4.5
 SPEED = 32
 tile_images = {'wall': load_image('cobblestone.png'),
                'empty': load_image('font.png'),
+               'empty_fakel': load_image('font_with_fakel.png'),
                'platform': load_image('cobblestone_16.png'),
                'portal': load_image('portal.png'),
                'down_flag': load_image('down_flag.png'),

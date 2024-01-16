@@ -22,6 +22,8 @@ def generate_level(level):
                 Wall(x, y)
             elif level[y][x] == '_':
                 Platform(x, y)
+            elif level[y][x] == ',':
+                BackgroundFakel(x, y)
             elif level[y][x] == '@':
                 new_player = Player(x, y)
             elif level[y][x] == 'F':
@@ -120,6 +122,14 @@ class Background(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(empty_group, all_sprites)
         self.image = tile_images['empty']
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
+                                               * pos_y)
+
+
+class BackgroundFakel(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(empty_group, all_sprites)
+        self.image = tile_images['empty_fakel']
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height
                                                * pos_y)
 
