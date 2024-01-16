@@ -222,7 +222,7 @@ def go_level(_id: int, result: tuple):
             if new_text_time < 2 * 50:
                 print_text("Нажмите Е для выхода",
                            (finish_tile.rect.x, finish_tile.rect.y - 17),
-                           color="blue", mn=1, size=15)
+                           color="red", mn=1, size=15)
                 new_text_time += 1
             if keys[pygame.K_e]:
                 new_text_time = 2 * 50
@@ -498,7 +498,7 @@ def go_education_level():
             if new_text_time < 2 * 50:
                 print_text("Нажмите Е для выхода",
                            (finish_tile.rect.x, finish_tile.rect.y - 17),
-                           color="blue", mn=1, size=15)
+                           color="red", mn=1, size=15)
                 new_text_time += 1
             if keys[pygame.K_e]:
                 new_text_time = 2 * 50
