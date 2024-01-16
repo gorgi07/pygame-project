@@ -29,6 +29,9 @@ def screen_draw():
 
 
 def print_text(text: str, coord: tuple, color='green', mn=1.5, size=40):
+    """
+    Функция выводы текста на экран игры
+    """
     font = pygame.font.Font(None, size)
     text = font.render(text, True, color)
     text_x = coord[0] - text.get_width() // 2
@@ -36,7 +39,10 @@ def print_text(text: str, coord: tuple, color='green', mn=1.5, size=40):
     screen.blit(text, (text_x, text_y))
 
 
-def finish_screen(name, _id, flags):
+def finish_screen(name: str, _id: int, flags: int):
+    """
+    Функция создания экрана окончания уровня
+    """
     fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
     fon.set_alpha(200)
     screen.blit(fon, (0, 0))
@@ -88,7 +94,10 @@ def finish_screen(name, _id, flags):
         clock.tick(FPS)
 
 
-def finish_screen_for_education(flags):
+def finish_screen_for_education(flags: int):
+    """
+    Функция создания экрана окончания обучения
+    """
     fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
     fon.set_alpha(200)
     screen.blit(fon, (0, 0))
@@ -135,6 +144,9 @@ def finish_screen_for_education(flags):
 
 
 def screen_clear():
+    """
+    Функция удаления спрацтов из групп
+    """
     all_sprites.empty()
     wall_group.empty()
     player_group.empty()
@@ -144,7 +156,11 @@ def screen_clear():
     buttons_group.empty()
 
 
-def finish_level(name, _id, flags):
+def finish_level(name: str, _id: int, flags: int):
+    """
+    Функция завершения уровня
+    (запись в базу данных результатов прохождения уровня)
+    """
     con = sqlite3.connect("game_db.db")
     cur = con.cursor()
     level = f"level_{_id}"
@@ -158,7 +174,10 @@ def finish_level(name, _id, flags):
     finish_screen(name, _id, flags)
 
 
-def go_level(_id: int | str, result: tuple):
+def go_level(_id: int, result: tuple):
+    """
+    Функция запуска уровня
+    """
     running = True
     count_flag = 0
     if _id != 1:
@@ -217,18 +236,10 @@ def go_level(_id: int | str, result: tuple):
     levels_screen("Player")
 
 
-def fog(player):
-    for x in range(WIDTH // tile_width):
-        for y in range(HEIGHT // tile_height):
-            if (abs(player.rect.x // tile_width - x) >= 2
-                    or abs(player.rect.y // tile_height - y) >= 2):
-                pygame.draw.rect(screen, 'black', (x * tile_width,
-                                                   y * tile_height,
-                                                   tile_width,
-                                                   tile_height))
-
-
-def levels_screen(name):
+def levels_screen(name: str):
+    """
+    Функция создания меню выбора уровня
+    """
     con = sqlite3.connect("game_db.db")
     cur = con.cursor()
 
@@ -373,6 +384,9 @@ def levels_screen(name):
 
 
 def information_screen():
+    """
+    Функция отрисовки окна с информацией о создателях игры
+    """
     intro_text = ["АВТОРЫ ИДЕИ:",
                   "Ерохин Егор  Никулин Никита", "",
                   "РАЗРАБОТЧИКИ:",
@@ -554,6 +568,9 @@ def start_screen():
 
 
 def checking_flags(player, flags_group):
+    """
+    Функция проверки перемсечения игрока с флагом на игровом поле
+    """
     flag = pygame.sprite.spritecollideany(player, flags_group)
     if flag is not None:
         if (flag.activity and flag.rect.x - player.rect.x < 20
@@ -562,3 +579,17 @@ def checking_flags(player, flags_group):
             flag.image = tile_images['up_flag']
             return 1
     return 0
+
+
+def fog(player):
+    """
+    Функция отрисовки тумана
+    """
+    for x in range(WIDTH // tile_width):
+        for y in range(HEIGHT // tile_height):
+            if (abs(player.rect.x // tile_width - x) >= 2
+                    or abs(player.rect.y // tile_height - y) >= 2):
+                pygame.draw.rect(screen, 'black', (x * tile_width,
+                                                   y * tile_height,
+                                                   tile_width,
+                                                   tile_height))
