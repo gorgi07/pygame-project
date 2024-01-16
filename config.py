@@ -14,7 +14,9 @@ tile_images = {'wall': load_image('cobblestone.png'),
                'down_flag': load_image('down_flag.png'),
                'up_flag': load_image('up_flag.png'),
                'down_btn1': load_image('down_button1.png'),
-               'up_btn1': load_image('up_button1.png')}
+               'up_btn1': load_image('up_button1.png'),
+               'down_btn2': load_image('down_button2.png'),
+               'up_btn2': load_image('up_button2.png')}
 tile_width = tile_height = 64
 
 player = None
@@ -31,4 +33,3 @@ clock = pygame.time.Clock()
 
 game_flag = True
 jump_move = 0
-
