@@ -52,6 +52,75 @@ def print_text(text: str, coord: tuple, color='green', mn=1.5, size=40):
     screen.blit(text, (text_x, text_y))
 
 
+def esc_menu(level_id, flags):
+    fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
+    fon.set_alpha(200)
+    screen.blit(fon, (0, 0))
+
+    window = pygame.transform.scale(load_image(f'finish_picture{flags}.png'),
+                                    (WIDTH // 3 * 2, HEIGHT // 3 * 2))
+    screen.blit(window, (WIDTH // 6, HEIGHT // 6))
+
+    if level_id == 0:
+        text = "В меню"
+    else:
+        text = "К уровням"
+
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+    continue_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 310), (200, 40)),
+        text="Продолжить",
+        manager=manager
+    )
+    repeat_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 370), (200, 40)),
+        text="Начать заново",
+        manager=manager
+    )
+    menu_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 430), (200, 40)),
+        text=text,
+        manager=manager
+    )
+
+    while True:
+        time_delta = clock.tick(FPS) / 1000.0
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif keys[pygame.K_ESCAPE]:
+                manager.clear_and_reset()
+                return None
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == continue_button:
+                        manager.clear_and_reset()
+                        return None
+                    elif event.ui_element == repeat_button:
+                        manager.clear_and_reset()
+                        screen_clear()
+                        if level_id == 0:
+                            go_education_level()
+                        else:
+                            go_level(level_id, (1, 0))
+                    elif event.ui_element == menu_button:
+                        manager.clear_and_reset()
+                        screen_clear()
+                        if level_id == 0:
+                            start_screen()
+                        else:
+                            levels_screen("Player")
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def finish_level(name: str, _id: int, flags: int):
     """
     Функция завершения уровня
@@ -197,7 +266,7 @@ def go_level(_id: int, result: tuple):
             if event.type == pygame.QUIT:
                 running = False
             elif keys[pygame.K_ESCAPE]:
-                pygame.display.iconify()
+                esc_menu(_id, count_flag)
             else:
                 player.moving(keys)
 
@@ -253,7 +322,7 @@ def go_education_level():
             if event.type == pygame.QUIT:
                 running = False
             elif keys[pygame.K_ESCAPE]:
-                pygame.display.iconify()
+                esc_menu(0, count_flag)
             else:
                 player.moving(keys)
 
