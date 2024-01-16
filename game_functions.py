@@ -28,6 +28,19 @@ def screen_draw():
     player_group.draw(screen)
 
 
+def screen_clear():
+    """
+    Функция удаления спрацтов из групп
+    """
+    all_sprites.empty()
+    wall_group.empty()
+    player_group.empty()
+    finish_group.empty()
+    empty_group.empty()
+    flags_group.empty()
+    buttons_group.empty()
+
+
 def print_text(text: str, coord: tuple, color='green', mn=1.5, size=40):
     """
     Функция выводы текста на экран игры
@@ -37,6 +50,93 @@ def print_text(text: str, coord: tuple, color='green', mn=1.5, size=40):
     text_x = coord[0] - text.get_width() // 2
     text_y = round(coord[1] * mn)
     screen.blit(text, (text_x, text_y))
+
+
+def esc_menu(level_id, flags):
+    fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
+    fon.set_alpha(200)
+    screen.blit(fon, (0, 0))
+
+    window = pygame.transform.scale(load_image(f'finish_picture{flags}.png'),
+                                    (WIDTH // 3 * 2, HEIGHT // 3 * 2))
+    screen.blit(window, (WIDTH // 6, HEIGHT // 6))
+
+    if level_id == 0:
+        text = "В меню"
+    else:
+        text = "К уровням"
+
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+    continue_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 310), (200, 40)),
+        text="Продолжить",
+        manager=manager
+    )
+    repeat_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 370), (200, 40)),
+        text="Начать заново",
+        manager=manager
+    )
+    menu_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 430), (200, 40)),
+        text=text,
+        manager=manager
+    )
+
+    while True:
+        time_delta = clock.tick(FPS) / 1000.0
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif keys[pygame.K_ESCAPE]:
+                manager.clear_and_reset()
+                return None
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == continue_button:
+                        manager.clear_and_reset()
+                        return None
+                    elif event.ui_element == repeat_button:
+                        manager.clear_and_reset()
+                        screen_clear()
+                        if level_id == 0:
+                            go_education_level()
+                        else:
+                            go_level(level_id, (1, 0))
+                    elif event.ui_element == menu_button:
+                        manager.clear_and_reset()
+                        screen_clear()
+                        if level_id == 0:
+                            start_screen()
+                        else:
+                            levels_screen("Player")
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def finish_level(name: str, _id: int, flags: int):
+    """
+    Функция завершения уровня
+    (запись в базу данных результатов прохождения уровня)
+    """
+    con = sqlite3.connect("game_db.db")
+    cur = con.cursor()
+    level = f"level_{_id}"
+    res = cur.execute(f"""SELECT {level} FROM players WHERE name = ?""",
+                      (name, )).fetchone()
+    if int(res[0][3]) < flags:
+        cur.execute(f"""UPDATE players SET {level} = ? WHERE name = ?""",
+                    (f"1, {flags}", name))
+    con.commit()
+    cur.close()
+    finish_screen(name, _id, flags)
 
 
 def finish_screen(name: str, _id: int, flags: int):
@@ -143,37 +243,6 @@ def finish_screen_for_education(flags: int):
         clock.tick(FPS)
 
 
-def screen_clear():
-    """
-    Функция удаления спрацтов из групп
-    """
-    all_sprites.empty()
-    wall_group.empty()
-    player_group.empty()
-    finish_group.empty()
-    empty_group.empty()
-    flags_group.empty()
-    buttons_group.empty()
-
-
-def finish_level(name: str, _id: int, flags: int):
-    """
-    Функция завершения уровня
-    (запись в базу данных результатов прохождения уровня)
-    """
-    con = sqlite3.connect("game_db.db")
-    cur = con.cursor()
-    level = f"level_{_id}"
-    res = cur.execute(f"""SELECT {level} FROM players WHERE name = ?""",
-                      (name, )).fetchone()
-    if int(res[0][3]) < flags:
-        cur.execute(f"""UPDATE players SET {level} = ? WHERE name = ?""",
-                    (f"1, {flags}", name))
-    con.commit()
-    cur.close()
-    finish_screen(name, _id, flags)
-
-
 def go_level(_id: int, result: tuple):
     """
     Функция запуска уровня
@@ -197,7 +266,7 @@ def go_level(_id: int, result: tuple):
             if event.type == pygame.QUIT:
                 running = False
             elif keys[pygame.K_ESCAPE]:
-                pygame.display.iconify()
+                esc_menu(_id, count_flag)
             else:
                 player.moving(keys)
 
@@ -234,6 +303,115 @@ def go_level(_id: int, result: tuple):
 
     finish_level("Player", _id, count_flag)
     levels_screen("Player")
+
+
+def go_education_level():
+    """
+    Функция запуска обучения
+    """
+    running = True
+    count_flag = 0
+
+    player, level_x, level_y, text = generate_level(
+        load_level("level_education.txt"))
+
+    text_time = 0
+    while running:
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif keys[pygame.K_ESCAPE]:
+                esc_menu(0, count_flag)
+            else:
+                player.moving(keys)
+
+        if player.jump_flag:
+            player.jump()
+
+        wall_group.update()
+        player.update()
+        flags_group.update()
+        finish_group.update()
+        buttons_group.update()
+        count_flag += checking_flags(player, flags_group)
+        screen_draw()
+        if text_time < 3 * 50:
+            print_text(text, (WIDTH // 2, tile_height))
+            text_time += 1
+        finish_tile = pygame.sprite.spritecollideany(player, finish_group)
+        new_text_time = 0
+        if finish_tile is not None:
+            if new_text_time < 2 * 50:
+                print_text("Нажмите Е для выхода",
+                           (finish_tile.rect.x, finish_tile.rect.y - 17),
+                           color="red", mn=1, size=15)
+                new_text_time += 1
+            if keys[pygame.K_e]:
+                new_text_time = 2 * 50
+                running = False
+        else:
+            new_text_time = 2 * 50
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    finish_screen_for_education(count_flag)
+
+
+def start_screen():
+    """
+    Функция создания заставки стартового окна
+    """
+    fon = pygame.transform.scale(load_image('fon2.png'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+    play_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((50, 50), (300, 70)),
+        text="Играть",
+        manager=manager
+    )
+
+    education_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((50, 170), (300, 70)),
+        text="Обучение",
+        manager=manager
+    )
+
+    information_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((50, 290), (300, 70)),
+        text="Об авторах",
+        manager=manager
+    )
+
+    exit_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((50, 648), (300, 70)),
+        text="Выход",
+        manager=manager
+    )
+
+    while True:
+        time_delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    manager.clear_and_reset()
+                    if event.ui_element == play_button:
+                        levels_screen("Player")
+                    elif event.ui_element == education_button:
+                        go_education_level()
+                    elif event.ui_element == information_button:
+                        information_screen()
+                    elif event.ui_element == exit_button:
+                        terminate()
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 def levels_screen(name: str):
@@ -450,115 +628,6 @@ def information_screen():
                         )
                     elif event.ui_element == support_button:
                         pass
-
-            manager.process_events(event)
-        manager.update(time_delta)
-        manager.draw_ui(screen)
-        pygame.display.flip()
-        clock.tick(FPS)
-
-
-def go_education_level():
-    """
-    Функция запуска обучения
-    """
-    running = True
-    count_flag = 0
-
-    player, level_x, level_y, text = generate_level(
-        load_level("level_education.txt"))
-
-    text_time = 0
-    while running:
-        keys = pygame.key.get_pressed()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif keys[pygame.K_ESCAPE]:
-                pygame.display.iconify()
-            else:
-                player.moving(keys)
-
-        if player.jump_flag:
-            player.jump()
-
-        wall_group.update()
-        player.update()
-        flags_group.update()
-        finish_group.update()
-        buttons_group.update()
-        count_flag += checking_flags(player, flags_group)
-        screen_draw()
-        if text_time < 3 * 50:
-            print_text(text, (WIDTH // 2, tile_height))
-            text_time += 1
-        finish_tile = pygame.sprite.spritecollideany(player, finish_group)
-        new_text_time = 0
-        if finish_tile is not None:
-            if new_text_time < 2 * 50:
-                print_text("Нажмите Е для выхода",
-                           (finish_tile.rect.x, finish_tile.rect.y - 17),
-                           color="red", mn=1, size=15)
-                new_text_time += 1
-            if keys[pygame.K_e]:
-                new_text_time = 2 * 50
-                running = False
-        else:
-            new_text_time = 2 * 50
-        pygame.display.flip()
-        clock.tick(FPS)
-
-    finish_screen_for_education(count_flag)
-
-
-def start_screen():
-    """
-    Функция создания заставки стартового окна
-    """
-    fon = pygame.transform.scale(load_image('fon2.png'), (WIDTH, HEIGHT))
-    screen.blit(fon, (0, 0))
-    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
-    play_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((50, 50), (300, 70)),
-        text="Играть",
-        manager=manager
-    )
-
-    education_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((50, 170), (300, 70)),
-        text="Обучение",
-        manager=manager
-    )
-
-    information_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((50, 290), (300, 70)),
-        text="Об авторах",
-        manager=manager
-    )
-
-    exit_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((50, 648), (300, 70)),
-        text="Выход",
-        manager=manager
-    )
-
-    while True:
-        time_delta = clock.tick(FPS) / 1000.0
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-
-            elif event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    manager.clear_and_reset()
-                    if event.ui_element == play_button:
-                        levels_screen("Player")
-                    elif event.ui_element == education_button:
-                        go_education_level()
-                    elif event.ui_element == information_button:
-                        information_screen()
-                    elif event.ui_element == exit_button:
-                        terminate()
 
             manager.process_events(event)
         manager.update(time_delta)
