@@ -126,7 +126,7 @@ def finish_level(name: str, _id: int, flags: int):
     Функция завершения уровня
     (запись в базу данных результатов прохождения уровня)
     """
-    con = sqlite3.connect("game_db.db")
+    con = sqlite3.connect("data/game_db.db")
     cur = con.cursor()
     level = f"level_{_id}"
     res = cur.execute(f"""SELECT {level} FROM players WHERE name = ?""",
@@ -418,7 +418,7 @@ def levels_screen(name: str):
     """
     Функция создания меню выбора уровня
     """
-    con = sqlite3.connect("game_db.db")
+    con = sqlite3.connect("data/game_db.db")
     cur = con.cursor()
 
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))

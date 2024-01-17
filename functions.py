@@ -1,3 +1,4 @@
+import sqlite3
 import sys
 import pygame
 import os
@@ -39,6 +40,46 @@ def load_level(filename: str) -> list:
     array = list(map(lambda x: x.ljust(max_width, '.'), level_map[:-1]))
     array.append(level_map[-1])
     return array
+
+
+def check_db(name: str):
+    """
+    Функция для создания базы данных игры, если она отсутствует
+    """
+    if not os.path.exists(f"data/{name}.db"):
+        file = open(f"data/{name}.db", "a+")
+        file.close()
+
+        con = sqlite3.connect(f"data/{name}.db")
+        cur = con.cursor()
+
+        cur.execute('''CREATE TABLE "players" (
+            "name"	TEXT,
+            "level_1"	TEXT,
+            "level_2"	TEXT,
+            "level_3"	TEXT,
+            "level_4"	TEXT,
+            "level_5"	TEXT,
+            "level_6"	TEXT,
+            "level_7"	TEXT,
+            "level_8"	TEXT)''')
+
+        con.commit()
+        con.close()
+
+        con = sqlite3.connect(f"data/{name}.db")
+        cur = con.cursor()
+
+        cur.execute('''INSERT INTO players 
+            (name, level_1, level_2, level_3, level_4, 
+            level_5, level_6, level_7, level_8) 
+            VALUES 
+            (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    ("Player", "0, 0", "0, 0", "0, 0", "0, 0",
+                     "0, 0", "0, 0", "0, 0", "0, 0"))
+
+        con.commit()
+        con.close()
 
 
 def terminate():
