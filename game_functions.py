@@ -327,10 +327,13 @@ def go_level(_id: int, result: tuple):
             player.jump()
 
         wall_group.update()
+        if player.life is False:
+            death_screen(_id)
         player.update()
         flags_group.update()
         finish_group.update()
         buttons_group.update()
+
         count_flag += checking_flags(player, flags_group)
         screen_draw()
         if _id == 1:

@@ -134,7 +134,7 @@ class ActiveBlock(Wall):
                 player = \
                     pygame.sprite.spritecollide(self, player_group, False)[0]
                 if player.rect.y > self.rect.y:
-                    pass
+                    player.life = False
 
 
 class Background(pygame.sprite.Sprite):
@@ -193,7 +193,7 @@ class ActVertPlatform(Platform):
         if pygame.sprite.spritecollideany(self, player_group):
             player = pygame.sprite.spritecollide(self, player_group, False)[0]
             if player.rect.y > self.rect.y:
-                pass
+                player.life = False
 
 
 class ActGorPlatform(Platform):
@@ -310,6 +310,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15,
                                                tile_height * pos_y + 20)
         self.jump_flag = True
+        self.life = True
 
     def jump(self):
         """
