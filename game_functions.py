@@ -135,7 +135,7 @@ def finish_level(name: str, _id: int, flags: int):
         cur.execute(f"""UPDATE players SET {level} = ? WHERE name = ?""",
                     (f"1, {flags}", name))
     con.commit()
-    cur.close()
+    con.close()
     finish_screen(name, _id, flags)
 
 
@@ -549,7 +549,7 @@ def levels_screen(name: str):
                     else:
                         res = (1, 0)
 
-                    cur.close()
+                    con.close()
                     levels_manager.clear_and_reset()
                     go_level(level_id, res)
 
