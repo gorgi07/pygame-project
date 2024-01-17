@@ -1,9 +1,10 @@
+import os
 import pygame
 import pygame_gui
 import sqlite3
 from pygame_gui.core import ObjectID
 import webbrowser
-from functions import (load_image, load_level, terminate)
+from functions import (load_image, load_level, terminate, create_qr)
 from classes import generate_level
 from config import (tile_width, tile_height, FPS,
                     clock, wall_group, empty_group,
@@ -627,7 +628,52 @@ def information_screen():
                             "https://github.com/gorgi07/pygame-project"
                         )
                     elif event.ui_element == support_button:
-                        pass
+                        txt = "Spasibo za podderjky, no deneg nam ne nado :)"
+                        if len(txt) > 10:
+                            txt2 = txt[:9].replace(" ", "_")
+                        else:
+                            txt2 = txt.replace(" ", "_")
+                        if not os.path.exists(f"data/qr_{txt2}.png"):
+                            create_qr(txt)
+                        qr_menu(txt2)
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def qr_menu(text: str):
+    fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
+    fon.set_alpha(200)
+    screen.blit(fon, (0, 0))
+
+    window = pygame.transform.scale(load_image(f'qr_{text}.png'),
+                                    (WIDTH // 3 * 2, HEIGHT // 3 * 2))
+    screen.blit(window, (WIDTH // 6, HEIGHT // 6))
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+
+    exit_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 6, HEIGHT // 6), (60, 40)),
+        text="X",
+        manager=manager)
+
+    while True:
+        time_delta = clock.tick(60) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                manager.clear_and_reset()
+                information_screen()
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == exit_button:
+                        manager.clear_and_reset()
+                        information_screen()
 
             manager.process_events(event)
         manager.update(time_delta)

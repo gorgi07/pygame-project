@@ -2,6 +2,7 @@ import sqlite3
 import sys
 import pygame
 import os
+import qrcode
 from screen import screen
 
 pygame.init()
@@ -80,6 +81,15 @@ def check_db(name: str):
 
         con.commit()
         con.close()
+
+
+def create_qr(text: str):
+    image = qrcode.make(text)
+    new_text = text.replace(" ", "_")
+    if len(new_text) > 10:
+        image.save(f"data/qr_{new_text[:9]}.png")
+    else:
+        image.save(f"data/qr_{new_text}.png")
 
 
 def terminate():
