@@ -122,6 +122,55 @@ def esc_menu(level_id, flags):
         clock.tick(FPS)
 
 
+def death_screen(level_id: int):
+    """
+    Функция отображения экрана смерти
+    """
+    fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
+    fon.set_alpha(200)
+    screen.blit(fon, (0, 0))
+
+    window = pygame.transform.scale(load_image('finish_picture0.png'),
+                                    (WIDTH // 3 * 2, HEIGHT // 3 * 2))
+    screen.blit(window, (WIDTH // 6, HEIGHT // 6))
+
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+
+    repeat_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 310), (200, 40)),
+        text="Начать заново",
+        manager=manager
+    )
+    menu_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 2 - 100, 370), (200, 40)),
+        text="К уровням",
+        manager=manager
+    )
+
+    while True:
+        time_delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == repeat_button:
+                        manager.clear_and_reset()
+                        screen_clear()
+                        go_level(level_id, (1, 0))
+                    elif event.ui_element == menu_button:
+                        manager.clear_and_reset()
+                        screen_clear()
+                        levels_screen("Player")
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def finish_level(name: str, _id: int, flags: int):
     """
     Функция завершения уровня
@@ -132,7 +181,10 @@ def finish_level(name: str, _id: int, flags: int):
     level = f"level_{_id}"
     res = cur.execute(f"""SELECT {level} FROM players WHERE name = ?""",
                       (name, )).fetchone()
-    if int(res[0][3]) < flags:
+    if int(res[0][0]) == 0:
+        cur.execute(f"""UPDATE players SET {level} = ? WHERE name = ?""",
+                    (f"1, {flags}", name))
+    elif int(res[0][3]) < flags and int(res[0][0]) == 1:
         cur.execute(f"""UPDATE players SET {level} = ? WHERE name = ?""",
                     (f"1, {flags}", name))
     con.commit()
