@@ -33,7 +33,7 @@ def generate_level(level):
             elif level[y][x] == '+':
                 ActVertPlatform(x, y, 64)
             elif level[y][x] == '-':
-                ActGorPlatform(x, y, 32)
+                ActGorPlatform(x, y, 64)
             elif level[y][x] == 'U':
                 ActiveBlock(x, y, 'up', 64)
             elif level[y][x] == 'D':
@@ -105,7 +105,7 @@ class ActiveBlock(Wall):
             flag = True
             if abs(self.y - self.start['y']) >= self.distance:
                 self.y -= self.v / FPS
-                self.act_flag = False
+                flag = False
             if flag and len(blocks) > 0:
                 self.y -= 3 * self.v / FPS
             self.rect.y = int(self.y)
@@ -122,10 +122,18 @@ class ActiveBlock(Wall):
             self.rect.x = int(self.x)
             while pygame.sprite.spritecollideany(self, player_group):
                 player = \
-                    pygame.sprite.spritecollide(self, player_group, False)[0]
+                pygame.sprite.spritecollide(self, player_group, False)[0]
                 if 0 < self.v:
+                    player.rect.x += 2
+                    if pygame.sprite.spritecollideany(player, wall_group):
+                        player.life = False
+                    player.rect.x -= 2
                     player.rect.x += 1
                 else:
+                    player.rect.x -= 2
+                    if pygame.sprite.spritecollideany(player, wall_group):
+                        player.life = False
+                    player.rect.x += 2
                     player.rect.x -= 1
         elif (not self.act_flag and
               self.rect.y != self.start['y'] and self.action == 'y'):
@@ -243,8 +251,16 @@ class ActGorPlatform(Platform):
         while pygame.sprite.spritecollideany(self, player_group):
             player = pygame.sprite.spritecollide(self, player_group, False)[0]
             if 0 < self.v:
+                player.rect.x += 2
+                if pygame.sprite.spritecollideany(player, wall_group):
+                    player.life = False
+                player.rect.x -= 2
                 player.rect.x += 1
             else:
+                player.rect.x -= 2
+                if pygame.sprite.spritecollideany(player, wall_group):
+                    player.life = False
+                player.rect.x += 2
                 player.rect.x -= 1
 
 
@@ -287,7 +303,7 @@ class NotStickyButton(pygame.sprite.Sprite):
             self.activity = False
             for elem in wall_group:
                 if type(elem) is ActiveBlock:
-                    elem.act_flag = True
+                    elem.act_flag = not elem.act_flag
 
 
 class StickyButton(pygame.sprite.Sprite):

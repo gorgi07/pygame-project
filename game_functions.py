@@ -336,7 +336,7 @@ def go_level(_id: int, result: tuple):
 
         count_flag += checking_flags(player, flags_group)
         screen_draw()
-        if _id == 1:
+        if _id in [1, 2, 3]:
             fog(player)
         if text_time < 3 * 50:
             print_text(text, (WIDTH // 2, tile_height))
@@ -350,10 +350,7 @@ def go_level(_id: int, result: tuple):
                            color="red", mn=1, size=15)
                 new_text_time += 1
             if keys[pygame.K_e]:
-                new_text_time = 2 * 50
                 running = False
-        else:
-            new_text_time = 2 * 50
         pygame.display.flip()
         clock.tick(FPS)
 
