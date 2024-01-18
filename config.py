@@ -19,6 +19,8 @@ tile_images = {'wall': load_image('cobblestone.png'),
                'up_btn2': load_image('up_button2.png')}
 tile_width = tile_height = 64
 
+jump_sound = pygame.mixer.Sound('data/jump.ogg')
+
 player = None
 all_sprites = pygame.sprite.Group()
 wall_group = pygame.sprite.Group()  # игрок сталкивается с этими спрайтами

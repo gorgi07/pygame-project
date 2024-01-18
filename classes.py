@@ -3,7 +3,7 @@ from functions import load_image
 from config import (tile_width, tile_height, tile_images, STEP, GRAVITY, FPS,
                     wall_group, empty_group, game_flag, jump_move, SPEED,
                     player_group, finish_group, all_sprites, flags_group,
-                    buttons_group)
+                    buttons_group, jump_sound)
 
 pygame.init()
 game_flag, jump_move = game_flag, jump_move
@@ -384,6 +384,7 @@ class Player(pygame.sprite.Sprite):
                 self.rect.x -= 1
 
         if keys[pygame.K_UP] and game_flag:
+            jump_sound.play()
             jump_move, self.jump_flag = 16, True
 
         if not keys[pygame.K_SPACE]:

@@ -9,6 +9,9 @@ screen = screen
 
 check_db("game_db")
 
+pygame.mixer.music.load("data/music.mp3")
+pygame.mixer.music.play(-1)
+
 try:
     start_screen()
 except KeyboardInterrupt:
