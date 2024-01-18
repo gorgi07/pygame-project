@@ -68,6 +68,7 @@ class ActiveBlock(Wall):
                       'y': pos_y * tile_height}
         self.distance = distance
         self.act_flag = False
+        self.direct = direct
         self.x, self.y = pos_x * tile_width, pos_y * tile_height
         if direct == 'up' or direct == 'left':
             self.v = -32
@@ -81,12 +82,13 @@ class ActiveBlock(Wall):
     def update(self):
         if self.action == 'x' and self.act_flag:
             self.x += self.v / FPS
-            blocks = pygame.sprite.spritecollide(self, wall_group, False)
+            blocks = list(pygame.sprite.spritecollide(self, wall_group, False))
+            blocks = list(filter(lambda x: x.direct != self.direct, blocks))
             flag = True
             if abs(self.x - self.start['x']) >= self.distance:
                 self.x -= self.v / FPS
                 flag = False
-            if flag and len(blocks) > 1:
+            if flag and len(blocks) > 0:
                 self.x = float(self.rect.x)
             self.rect.x = int(self.x)
             while pygame.sprite.spritecollideany(self, player_group):
@@ -99,11 +101,12 @@ class ActiveBlock(Wall):
         elif self.action == 'y' and self.act_flag:
             self.y += self.v / FPS
             blocks = list(pygame.sprite.spritecollide(self, wall_group, False))
+            blocks = list(filter(lambda x: x.direct != self.direct, blocks))
             flag = True
             if abs(self.y - self.start['y']) >= self.distance:
                 self.y -= self.v / FPS
                 self.act_flag = False
-            if flag and len(blocks) > 1:
+            if flag and len(blocks) > 0:
                 self.y -= 3 * self.v / FPS
             self.rect.y = int(self.y)
             if pygame.sprite.spritecollideany(self, player_group):
@@ -134,7 +137,15 @@ class ActiveBlock(Wall):
                 player = \
                     pygame.sprite.spritecollide(self, player_group, False)[0]
                 if player.rect.y > self.rect.y:
+                    player.rect.y += 2
+                elif player.rect.y <= self.rect.y:
+                    player.rect.y -= 2
+                if pygame.sprite.spritecollideany(player, wall_group):
                     player.life = False
+                if player.rect.y > self.rect.y:
+                    player.rect.y -= 2
+                elif player.rect.y <= self.rect.y:
+                    player.rect.y += 2
 
 
 class Background(pygame.sprite.Sprite):
@@ -192,8 +203,17 @@ class ActVertPlatform(Platform):
         self.rect.y = int(self.y)
         if pygame.sprite.spritecollideany(self, player_group):
             player = pygame.sprite.spritecollide(self, player_group, False)[0]
-            if player.rect.y > self.rect.y:
-                player.life = False
+            if player.rect.y != self.rect.y:
+                if player.rect.y > self.rect.y:
+                    player.rect.y += 8
+                elif player.rect.y <= self.rect.y:
+                    player.rect.y -= 8
+                if pygame.sprite.spritecollideany(player, wall_group):
+                    player.life = False
+                if player.rect.y > self.rect.y:
+                    player.rect.y -= 8
+                elif player.rect.y <= self.rect.y:
+                    player.rect.y += 8
 
 
 class ActGorPlatform(Platform):
@@ -209,13 +229,14 @@ class ActGorPlatform(Platform):
 
     def update(self):
         self.x += self.v / FPS
-        blocks = pygame.sprite.spritecollide(self, wall_group, False)
+        blocks = list(pygame.sprite.spritecollide(self, wall_group, False))
+        blocks = list(filter(lambda x: type(x) is not ActGorPlatform, blocks))
         flag = True
         if abs(self.x - self.start) >= self.dist:
             self.x -= self.v / FPS
             self.v = -self.v
             flag = False
-        if flag and len(blocks) > 1:
+        if flag and len(blocks) > 0:
             self.x -= 3 * self.v / FPS
             self.v = -self.v
         self.rect.x = int(self.x)
