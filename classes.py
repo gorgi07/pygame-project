@@ -62,6 +62,9 @@ class Wall(pygame.sprite.Sprite):
 
 
 class ActiveBlock(Wall):
+    '''
+    Класс активного блока
+    '''
     def __init__(self, pos_x, pos_y, direct, distance):
         super().__init__(pos_x, pos_y)
         self.start = {'x': pos_x * tile_width,
@@ -168,6 +171,9 @@ class Background(pygame.sprite.Sprite):
 
 
 class BackgroundFakel(pygame.sprite.Sprite):
+    '''
+    Класс фона с факелом
+    '''
     def __init__(self, pos_x, pos_y):
         super().__init__(empty_group, all_sprites)
         self.image = tile_images['empty_fakel']
@@ -288,6 +294,9 @@ class Flag(pygame.sprite.Sprite):
 
 
 class NotStickyButton(pygame.sprite.Sprite):
+    '''
+    Не залипающая кнопка
+    '''
     def __init__(self, pos_x, pos_y):
         super().__init__(buttons_group, all_sprites)
         self.image = tile_images['up_btn1']
@@ -307,6 +316,9 @@ class NotStickyButton(pygame.sprite.Sprite):
 
 
 class StickyButton(pygame.sprite.Sprite):
+    '''
+    Залипающая кнопка
+    '''
     def __init__(self, pos_x, pos_y):
         super().__init__(buttons_group, all_sprites)
         self.image = tile_images['up_btn2']
