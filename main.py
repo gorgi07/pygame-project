@@ -1,38 +1,20 @@
-from classes import *
-from config import (FPS, WIDTH, HEIGHT)
+import pygame
+from game_functions import start_screen, screen_clear, terminate
+from screen import screen
+from functions import check_db
 
 pygame.init()
 pygame.key.set_repeat(200, 70)
+screen = screen
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
+check_db("game_db")
 
-all_sprites = pygame.sprite.Group()
-wall_group = pygame.sprite.Group()  # игрок сталкивается с этими спрайтами
-empty_group = pygame.sprite.Group()    # игрок проходит через эти спрайты
-player_group = pygame.sprite.Group()
+pygame.mixer.music.load("data/music.mp3")
+pygame.mixer.music.play(-1)
 
-start_screen()
-
-player, level_x, level_y = generate_level(load_level("levelex.txt"))
-
-running = True
-flag = True
-jump = 0
-
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        else:
-            player.moving(pygame.key.get_pressed())
-
-    if player.jump_flag:
-        player.jump()
-
-    player.update()
-    screen_draw()
-    pygame.display.flip()
-    clock.tick(FPS)
-
-terminate()
+try:
+    start_screen()
+except KeyboardInterrupt:
+    terminate()
+finally:
+    screen_clear()
