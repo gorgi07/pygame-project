@@ -296,6 +296,49 @@ def finish_screen_for_education(flags: int):
         clock.tick(FPS)
 
 
+def error_screen(_id: int):
+    fon = pygame.transform.scale(load_image('fon3.png'), (WIDTH, HEIGHT))
+    fon.set_alpha(200)
+    screen.blit(fon, (0, 0))
+
+    window = pygame.transform.scale(load_image('fon3.png'),
+                                    (WIDTH // 3 * 2, HEIGHT // 3 * 2))
+    screen.blit(window, (WIDTH // 6, HEIGHT // 6))
+
+    print_text(f"Уровень {_id} недоступен", (WIDTH // 2, HEIGHT // 6 + 75))
+    print_text(f"сначала пройдите уровень {_id - 1}", (WIDTH // 2, HEIGHT // 6 + 150))
+
+    manager = pygame_gui.UIManager((WIDTH, HEIGHT))
+    exc_button = pygame_gui.elements.UIButton(
+        relative_rect=pygame.Rect((WIDTH // 6, HEIGHT // 6), (60, 40)),
+        text="X",
+        manager=manager
+    )
+
+    while True:
+        time_delta = clock.tick(FPS) / 1000.0
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif keys[pygame.K_ESCAPE]:
+                manager.clear_and_reset()
+                levels_screen("Player")
+
+            elif event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == exc_button:
+                        manager.clear_and_reset()
+                        levels_screen("Player")
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def go_level(_id: int, result: tuple):
     """
     Функция запуска уровня
@@ -307,8 +350,7 @@ def go_level(_id: int, result: tuple):
             player, level_x, level_y, text = generate_level(
                 load_level(f"level{_id}.txt"))
         else:
-            print("error")
-            return
+            error_screen(_id)
     else:
         player, level_x, level_y, text = generate_level(
             load_level(f"level{_id}.txt"))
